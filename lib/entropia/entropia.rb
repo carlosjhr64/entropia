@@ -19,8 +19,13 @@ module ENTROPIA
     # Needs to keep track of
     # the base the entropy string is in,
     # and how much entropy and randomness it contains.
-    attr_reader :base, :randomness, :entropy
-    def initialize(string='', base=2, randomness=0, entropy=nil, digits=nil)
+    attr_reader :base, :randomness, :shuffled, :entropy
+    def initialize(string='',
+                   base=2,
+                   randomness=0,
+                   shuffled=false,
+                   entropy=nil,
+                   digits=nil)
       super(string)
       @base       = base
       @digits     = (digits)?  digits  :
@@ -28,6 +33,7 @@ module ENTROPIA
                      BaseConvert::DIGITS
       @randomness = randomness
       set_entropy((entropy)? entropy : base ** self.length)
+      @shuffled = shuffled
     end
     # Entropy capacity is often measured in "bits",
     # a logarithmic value of entropy.
@@ -52,23 +58,34 @@ module ENTROPIA
 
     # The operator for base convert.
     def *(n, digits=nil)
-      b = BaseConvert.new(self.base, n)
+      b = BaseConvert.new(@base, n)
       # Ensure the choice of digits
       (digits)? (b.to_digits=digits) : (digits=b.to_digits)
       b.from_digits = @digits
       #def initialize(string='', base=2, randomness=0, entropy=nil, digits=nil)
-      return Entropia.new(b.convert(self.to_s), n, self.randomness, self.entropy, digits)
+      return Entropia.new(b.convert(self.to_s),
+                          n,
+                          @randomness,
+                          @shuffled,
+                          @entropy,
+                          digits)
     end
     # We need to convert our given s to our base
     # before concatination and then
     # create the new entropy object in our base.
     def +(s)
-      n = self.base
-      r = self.randomness + s.randomness
-      e = self.entropy * s.entropy
+      n = @base
+      r = @randomness + s.randomness
+      f = @shuffled and s.shuffled
+      e = @entropy * s.entropy
       s = s*n unless n == s.base
       #def initialize(string='', base=2, randomness=0, entropy=nil, digits=nil)
-      return Entropia.new(super(s), n, r, e, @digits)
+      return Entropia.new(super(s),
+                          n,
+                          r,
+                          f,
+                          e,
+                          @digits)
     end
     # Entropia objects representing the same value should be equal eachother.
     def ==(e)
