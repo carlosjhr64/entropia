@@ -57,7 +57,7 @@ module ENTROPIA
     alias pp increase
 
     # The operator for base convert.
-    def *(n, digits=nil)
+    def convert(n, digits=nil)
       b = BaseConvert.new(@base, n)
       # Ensure the choice of digits
       (digits)? (b.to_digits=digits) : (digits=b.to_digits)
@@ -70,6 +70,9 @@ module ENTROPIA
                           @entropy,
                           digits)
     end
+    def *(n)
+      convert(n)
+    end
     # We need to convert our given s to our base
     # before concatination and then
     # create the new entropy object in our base.
@@ -79,7 +82,7 @@ module ENTROPIA
       f = @shuffled and s.shuffled
       e = @entropy * s.entropy
       s = s*n unless n == s.base
-      #def initialize(string='', base=2, randomness=0, entropy=nil, digits=nil)
+      #def initialize(string='', base=2, randomness=0, shuffled=false, entropy=nil, digits=nil)
       return Entropia.new(super(s),
                           n,
                           r,
@@ -92,10 +95,40 @@ module ENTROPIA
       e = e*@base unless e.base == @base
       self.to_s == e.to_s
     end
+    # xor :-??
+    def ^(b)
+      r = [@randomness, b.randomness].min
+      f = @shuffled and b.shuffled
+      e = [@entropy,    b.entropy].min
+
+      a = (@base==2)?  self : self*2
+      z, u = a.digits[0], a.digits[1]
+
+      b = (b.base==2)? b    : b.convert(2, [z, u])
+
+      a = a.chars
+      l = a.length
+      i = -1
+      s = b.chars.inject('') do |s, c|
+        i += 1
+        y = (a[i%l].to_s==u)
+        x = (c.to_s==u)
+        s+((x^y)? u : z)
+      end
+      s = Entropia.new(s, 2, r, f, e, [z, u])
+      s = s.convert(@base, @digits) unless @base==2
+
+      return s
+    end
     # The mathematical notation should be as terse as possible.
     # This will contruct a new entropy string.
     def self.[](n)
       Entropia.new.pp(n)
+    end
+
+    protected
+    def digits
+      @digits
     end
   end
   # For consision
