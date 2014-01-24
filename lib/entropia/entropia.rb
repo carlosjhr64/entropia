@@ -19,7 +19,7 @@ module ENTROPIA
     # Needs to keep track of
     # the base the entropy string is in,
     # and how much entropy and randomness it contains.
-    attr_reader :base, :randomness, :shuffled, :entropy
+    attr_reader :base, :randomness, :shuffled, :entropy, :digits
     def initialize(string='',
                    base=2,
                    randomness=0,
@@ -126,10 +126,7 @@ module ENTROPIA
       Entropia.new.pp(n)
     end
 
-    protected
-    def digits
-      @digits
-    end
+    protected :digits
   end
   # For consision
   E = Entropia
