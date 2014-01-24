@@ -38,7 +38,7 @@ module ENTROPIA
     # the entropy in the string.
     def increase(n=1, random=false)
       if block_given?
-        n.times{self<<@digits[yield]}
+        n.times{self<<@digits[yield(@base)]}
         @randomness += n*Lb[@base] if random
       else
         n.times{self<<@digits[SecureRandom.random_number(@base)]}
