@@ -84,6 +84,11 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal false, s.shuffled
     assert_equal 2**4,  s.entropy
     assert_equal 4.0,   s.bits
+
+    s = Entropia.nuevo('', :s=>true)
+    assert_equal true, s.shuffled
+    s.increase(4)
+    assert_equal false, s.shuffled
   end
 
   def test_005_pp # alias of increase
@@ -127,6 +132,11 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal false,   s.shuffled
     assert_equal 2**5,    s.entropy
     assert_equal 5.0,     s.bits
+
+    s = Entropia.nuevo('', :s=>true)
+    assert_equal true, s.shuffled
+    a = s.pp(5, true){ 1 } # as truly random (we lie)
+    assert_equal true, s.shuffled
   end
 
   def test_008_convert_base

@@ -43,7 +43,7 @@ module ENTROPIA
       Entropia.new(string,
                    h[:b] || h[:base]       || o.base       || 2,
                    h[:r] || h[:randomness] || o.randomness || 0,
-                   h[:s] || h[:shuffled]   || o.shuffled   || false,
+                   [h[:s], h[:shuffled], o.shuffled, false].detect{|f| !f.nil?},
                    h[:e] || h[:entropy]    || o.entropy,
                    h[:d] || h[:digits]     || o.digits)
     end
@@ -52,7 +52,7 @@ module ENTROPIA
       Entropia.new(string,
                    h[:b] || h[:base]       || 2,
                    h[:r] || h[:randomness] || 0,
-                   h[:s] || h[:shuffled]   || false,
+                   [h[:s], h[:shuffled], false].detect{|f| !f.nil?},
                    h[:e] || h[:entropy],
                    h[:d] || h[:digits])
     end
@@ -66,6 +66,7 @@ module ENTROPIA
     # Needs to be able to increase
     # the entropy in the string.
     def increase(n=1, random=false)
+      @shuffled = false unless random
       if block_given?
         n.times{self<<@digits[yield(@base)]}
         @randomness += n*Lb[@base] if random
@@ -85,13 +86,7 @@ module ENTROPIA
       # Ensure the choice of digits
       (digits)? (b.to_digits=digits) : (digits=b.to_digits)
       b.from_digits = @digits
-      #def initialize(string='', base=2, randomness=0, entropy=nil, digits=nil)
-      return Entropia.new(b.convert(self.to_s),
-                          n,
-                          @randomness,
-                          @shuffled,
-                          @entropy,
-                          digits)
+      return Entropia.novi(b.convert(self.to_s), self, :b=>n, :d=>digits)
     end
 
     def *(n)
@@ -102,18 +97,11 @@ module ENTROPIA
     # before concatination and then
     # create the new entropy object in our base.
     def +(s)
-      n = @base
       r = @randomness + s.randomness
       f = @shuffled and s.shuffled
       e = @entropy * s.entropy
-      s = s*n unless n == s.base
-      #def initialize(string='', base=2, randomness=0, shuffled=false, entropy=nil, digits=nil)
-      return Entropia.new(super(s),
-                          n,
-                          r,
-                          f,
-                          e,
-                          @digits)
+      s = s*@base unless @base == s.base
+      return Entropia.novi(super(s), self, :r=>r, :s=>f, :e=>e)
     end
 
     # Entropia objects representing the same value should be equal eachother.
@@ -122,7 +110,7 @@ module ENTROPIA
       self.to_s == e.to_s
     end
 
-    # xor :-??
+    # xor
     def ^(b)
       r = [@randomness, b.randomness].min
       f = @shuffled and b.shuffled
@@ -142,6 +130,7 @@ module ENTROPIA
         x = (c.to_s==u)
         s+((x^y)? u : z)
       end
+
       s = Entropia.new(s, 2, r, f, e, [z, u])
       s = s.convert(@base, @digits) unless @base==2
 
