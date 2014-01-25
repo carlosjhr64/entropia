@@ -14,8 +14,21 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 1,     s.entropy
     assert_equal 0.0,   s.bits
 
-    s = Entropia.new('0000')
-    assert_equal 2**4,     s.entropy
+    a = Entropia.new('0000')
+    assert_equal 2,     a.base
+    assert_equal 2**4,     a.entropy
+
+    b = Entropia.new('0000', 2, 0, false, 2, ['0', '1'])
+    assert_equal 2,     b.base
+    assert_equal 2,     b.entropy
+
+    c = Entropia.nuevo('0000', :entropy => 2)
+    assert_equal 2,     c.base
+    assert_equal 2,     c.entropy
+
+    d = Entropia.novi('0000', c)
+    assert_equal 2,     d.base
+    assert_equal 2,     d.entropy
   end
 
   def test_002_increase

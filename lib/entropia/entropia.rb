@@ -38,6 +38,24 @@ module ENTROPIA
       @shuffled = shuffled
     end
 
+    def self.novi(string, obj)
+      Entropia.new(string,
+                   obj.base        || 2,
+                   obj.randomness  || 0,
+                   obj.shuffled    || false,
+                   obj.entropy,
+                   obj.digits)
+    end
+
+    def self.nuevo(string, a={})
+      Entropia.new(string,
+                   a[:base]       || 2,
+                   a[:randomness] || 0,
+                   a[:shuffled]   || false,
+                   a[:entropy],
+                   a[:digits])
+    end
+
     # Entropy capacity is often measured in "bits",
     # a logarithmic value of entropy.
     def bits
@@ -135,7 +153,6 @@ module ENTROPIA
       Entropia.new.pp(n)
     end
 
-    protected :digits
   end
   # For consision
   E = Entropia
