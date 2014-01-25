@@ -13,6 +13,9 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal false, s.shuffled
     assert_equal 1,     s.entropy
     assert_equal 0.0,   s.bits
+
+    s = Entropia.new('0000')
+    assert_equal 2**4,     s.entropy
   end
 
   def test_002_increase

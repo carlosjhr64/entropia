@@ -1,5 +1,6 @@
 module ENTROPIA
   class Entropia < String
+
     # Needs to be able to set the
     # entropy capacity of the string
     # without changing its current "value".
@@ -11,6 +12,7 @@ module ENTROPIA
       end
       @entropy = entropy
     end
+
     # This is the set_entropy version in bits.
     def set_bits(bits)
       set_entropy(2**bits)
@@ -35,11 +37,13 @@ module ENTROPIA
       set_entropy((entropy)? entropy : base ** self.length)
       @shuffled = shuffled
     end
+
     # Entropy capacity is often measured in "bits",
     # a logarithmic value of entropy.
     def bits
       Lb[@entropy]
     end
+
     # Needs to be able to increase
     # the entropy in the string.
     def increase(n=1, random=false)
@@ -70,9 +74,11 @@ module ENTROPIA
                           @entropy,
                           digits)
     end
+
     def *(n)
       convert(n)
     end
+
     # We need to convert our given s to our base
     # before concatination and then
     # create the new entropy object in our base.
@@ -90,11 +96,13 @@ module ENTROPIA
                           e,
                           @digits)
     end
+
     # Entropia objects representing the same value should be equal eachother.
     def ==(e)
       e = e*@base unless e.base == @base
       self.to_s == e.to_s
     end
+
     # xor :-??
     def ^(b)
       r = [@randomness, b.randomness].min
@@ -120,6 +128,7 @@ module ENTROPIA
 
       return s
     end
+
     # The mathematical notation should be as terse as possible.
     # This will contruct a new entropy string.
     def self.[](n)
