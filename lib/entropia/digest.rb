@@ -35,7 +35,7 @@ module ENTROPIA
       d.shuffled = true
       d.entropy = 256**d.length
       d.entropy = s.entropy if s.entropy < d.entropy
-      d.randomness = d.bits.to_i if d.randomness > d.bits
+      d.randomness = d.bits if d.randomness > d.bits
       d.digits = nil
       return d
     end

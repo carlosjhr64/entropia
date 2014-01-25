@@ -25,7 +25,7 @@ module ENTROPIA
     attr_reader :base, :randomness, :shuffled, :entropy, :digits
     def initialize(string='',
                    base=2,
-                   randomness=0,
+                   randomness=0.0,
                    shuffled=false,
                    entropy=nil,
                    digits=nil)
@@ -42,7 +42,7 @@ module ENTROPIA
     def self.novi(string, o, h={})
       Entropia.new(string,
                    h[:b] || h[:base]       || o.base       || 2,
-                   h[:r] || h[:randomness] || o.randomness || 0,
+                   h[:r] || h[:randomness] || o.randomness || 0.0,
                    [h[:s], h[:shuffled], o.shuffled, false].detect{|f| !f.nil?},
                    h[:e] || h[:entropy]    || o.entropy,
                    h[:d] || h[:digits]     || o.digits)
@@ -51,7 +51,7 @@ module ENTROPIA
     def self.nuevo(string, h)
       Entropia.new(string,
                    h[:b] || h[:base]       || 2,
-                   h[:r] || h[:randomness] || 0,
+                   h[:r] || h[:randomness] || 0.0,
                    [h[:s], h[:shuffled], false].detect{|f| !f.nil?},
                    h[:e] || h[:entropy],
                    h[:d] || h[:digits])
