@@ -25,6 +25,9 @@ module ENTROPIA
     def bits
       Lb[self.entropy]
     end
+    def shuffled?
+      self.shuffled
+    end
   end
 
   module Extended
