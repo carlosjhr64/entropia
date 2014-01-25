@@ -137,6 +137,21 @@ module ENTROPIA
       return s
     end
 
+    def shuffled?
+      @shuffled
+    end
+
+    def shuffle
+      s = (@base==2)? self : self*2
+      # I think that with a good enough random number generator
+      # for the shuffle and truly random bits, this should suffice.
+      s = s.to_s.chars.shuffle.join
+      s = Entropia.novi(s, self, :b=>2, :s=>true)
+      s = s*@base unless @base==2
+
+      return s
+    end
+
     # The mathematical notation should be as terse as possible.
     # This will contruct a new entropy string.
     def self.[](n)
