@@ -29,9 +29,53 @@ class TestEntropia < Test::Unit::TestCase
     d = Entropia.novi('0000', c)
     assert_equal 2,     d.base
     assert_equal 2,     d.entropy
+    assert_equal 0,     d.randomness
+
+    e = Entropia.novi('0000', d, {:randomness => 1})
+    assert_equal 2,     e.base
+    assert_equal 2,     e.entropy
+    assert_equal 1,     e.randomness
+
+    f = Entropia.novi('0000', e, {:r => 3})
+    assert_equal 2,     f.base
+    assert_equal 2,     f.entropy
+    assert_equal 3,     f.randomness
   end
 
-  def test_002_increase
+  def test_002_set_entropy
+    s = Entropia.new
+    assert_equal 0, s.length
+
+    e = s.set_entropy(2**16)
+    assert_equal 16,                 s.length
+    assert_equal e,                  s.entropy
+    assert_equal 2**16,              s.entropy
+    assert_equal '0000000000000000', s.to_s
+
+    s = Entropia.nuevo('', :d => ['!','+'], :s => true)
+    assert_equal 0,    s.length
+    assert_equal true, s.shuffled
+
+    e = s.set_entropy(2**16)
+    assert_equal false,              s.shuffled
+    assert_equal 16,                 s.length
+    assert_equal e,                  s.entropy
+    assert_equal 2**16,              s.entropy
+    assert_equal '!!!!!!!!!!!!!!!!', s.to_s
+  end
+
+  def test_003_set_bits
+    s = Entropia.new
+    assert_equal 0, s.length
+    e = s.set_bits(16)
+
+    assert_equal 16,                 s.length
+    assert_equal e,                  s.entropy
+    assert_equal 2**16,              s.entropy
+    assert_equal '0000000000000000', s.to_s
+  end
+
+  def test_004_increase
     s = Entropia.new
     assert_nothing_raised(Exception){ s.increase(4) }
     assert_equal 4,     s.length
@@ -42,7 +86,7 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 4.0,   s.bits
   end
 
-  def test_003_pp # alias of increase
+  def test_005_pp # alias of increase
     s = Entropia.new
     assert_nothing_raised(Exception){ s.pp }
     assert_nothing_raised(Exception){ s.pp }
@@ -57,7 +101,7 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 3.0,    s.bits
   end
 
-  def test_004_pp_block
+  def test_006_pp_block
     s = Entropia.new
     a = s.pp(6){ 0 }
     assert_equal a,        s
@@ -71,7 +115,7 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 6.0,      s.bits
   end
 
-  def test_005_pp_true_block
+  def test_007_pp_true_block
     s = Entropia.new
     a = s.pp(5, true){ 1 } # as truly random (we lie)
     assert_equal a,       s
@@ -83,28 +127,6 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal false,   s.shuffled
     assert_equal 2**5,    s.entropy
     assert_equal 5.0,     s.bits
-  end
-
-  def test_006_set_entropy
-    s = Entropia.new
-    assert_equal 0, s.length
-
-    e = s.set_entropy(2**16)
-    assert_equal 16,                 s.length
-    assert_equal e,                  s.entropy
-    assert_equal 2**16,              s.entropy
-    assert_equal '0000000000000000', s.to_s
-  end
-
-  def test_007_set_bits
-    s = Entropia.new
-    assert_equal 0, s.length
-    e = s.set_bits(16)
-
-    assert_equal 16,                 s.length
-    assert_equal e,                  s.entropy
-    assert_equal 2**16,              s.entropy
-    assert_equal '0000000000000000', s.to_s
   end
 
   def test_008_convert_base

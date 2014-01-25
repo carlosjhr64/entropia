@@ -9,6 +9,7 @@ module ENTROPIA
       zero = @digits.first
       while entropy > @base ** self.length
         self.insert(0, zero)
+        @shuffled = false if @shuffled
       end
       @entropy = entropy
     end
@@ -38,22 +39,22 @@ module ENTROPIA
       @shuffled = shuffled
     end
 
-    def self.novi(string, obj)
+    def self.novi(string, o, h={})
       Entropia.new(string,
-                   obj.base        || 2,
-                   obj.randomness  || 0,
-                   obj.shuffled    || false,
-                   obj.entropy,
-                   obj.digits)
+                   h[:b] || h[:base]       || o.base       || 2,
+                   h[:r] || h[:randomness] || o.randomness || 0,
+                   h[:s] || h[:shuffled]   || o.shuffled   || false,
+                   h[:e] || h[:entropy]    || o.entropy,
+                   h[:d] || h[:digits]     || o.digits)
     end
 
-    def self.nuevo(string, a={})
+    def self.nuevo(string, h)
       Entropia.new(string,
-                   a[:base]       || 2,
-                   a[:randomness] || 0,
-                   a[:shuffled]   || false,
-                   a[:entropy],
-                   a[:digits])
+                   h[:b] || h[:base]       || 2,
+                   h[:r] || h[:randomness] || 0,
+                   h[:s] || h[:shuffled]   || false,
+                   h[:e] || h[:entropy],
+                   h[:d] || h[:digits])
     end
 
     # Entropy capacity is often measured in "bits",
