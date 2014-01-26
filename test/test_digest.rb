@@ -1,0 +1,83 @@
+require 'test/unit'
+require 'entropia'
+
+class TestEntropia < Test::Unit::TestCase
+  include ENTROPIA
+
+  def test_000_digests
+    assert_equal Digest::SHA512, DIGEST[:D]
+    assert_equal Digest::MD5,    DIGEST[:C]
+  end
+
+  def test_001_extensions
+    a = 'abc'; a.extend Extensions
+    b = 'XYZ'; b.extend Extensions
+    assert_equal "9;9", a^b
+    assert_equal "9;9", b^a
+    assert_equal a, b^"9;9"
+    assert_equal b, a^"9;9"
+    c = a+b
+    d = b+a
+    assert_equal 'abcXYZ', c
+    assert_equal 'XYZabc', d
+    assert_equal "9;99;9", c^d
+    assert_equal "9;99;9", d^c
+    assert_equal d, c^"9;99;9"
+    assert_equal c, d^"9;99;9"
+    cq = c*Q
+    assert_equal "(wAsr$@", cq
+    dh = d*H
+    assert_equal "2C59B587163", dh
+    assert_nothing_raised(Exception){ a.entropy = 2**13 }
+    assert_equal 13, a.bits
+    assert_equal false, a.shuffled?
+    a.shuffled = true
+    assert_equal true, a.shuffled?
+  end
+
+  def test_002_extended
+    a = 'abcd'; a.extend Extensions
+    a.randomness = Lb[256**4]
+    a.entropy = 256**4
+    b = 'XYZ' # Because b is smaller, it can't contain all of a's entropy...
+    assert_nothing_raised(Exception){ Extended[b, a] }
+    assert_equal Lb[256**3], b.randomness
+    assert_equal 256**3, b.entropy
+    b = 'XYZZZ' # Now b is bigger, but it only has what a has....
+    assert_nothing_raised(Exception){ Extended[b, a] }
+    assert_equal Lb[256**4], b.randomness
+    assert_equal 256**4, b.entropy
+    b = 'XYZZZ' # Now b is bigger, but again it only has what a has....
+    a.randomness = Lb[256**1]
+    assert_nothing_raised(Exception){ Extended[b, a] }
+    assert_equal Lb[256**1], b.randomness
+    assert_equal 256**4, b.entropy
+    b = 'XYZ' # Now b is smaller, and it only has what a has that it can contain....
+    assert_nothing_raised(Exception){ Extended[b, a] }
+    assert_equal Lb[256**1], b.randomness
+    assert_equal 256**3, b.entropy
+  end
+
+  def test_003_mod_d
+    a = Entropia.new 'MyEntropia', Q
+    da = nil
+    assert_nothing_raised(Exception){ da = D[a] }
+    assert_equal Digest::SHA512.digest(a), da
+    DIGEST[:D] = Digest::SHA256
+    da = D[a]
+    assert_equal Digest::SHA256.digest(a), da
+    assert_equal "$Cxf)u-id[lr^oC)anTkUhzT(b?)e2=&Hg", da*Q
+  end
+
+  def test_004_mod_c
+    a = Entropia.new 'MyEntropia', Q
+    ca = nil
+    assert_nothing_raised(Exception){ ca = C[a] }
+    assert_equal Digest::MD5.digest(a), ca
+    DIGEST[:C] = Digest::SHA256
+    ca = D[a]
+    assert_equal Digest::SHA256.digest(a), ca
+    assert_equal "$Cxf)u-id[lr^oC)anTkUhzT(b?)e2=&Hg", ca*Q
+  end
+
+end

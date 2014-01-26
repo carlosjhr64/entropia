@@ -138,7 +138,7 @@ module ENTROPIA
     end
 
     def shuffled?
-      @shuffled
+      @shuffled==true
     end
 
     def shuffle

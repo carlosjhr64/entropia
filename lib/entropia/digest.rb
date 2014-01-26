@@ -26,7 +26,7 @@ module ENTROPIA
       Lb[self.entropy]
     end
     def shuffled?
-      self.shuffled
+      self.shuffled==true
     end
   end
 
