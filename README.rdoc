@@ -52,7 +52,7 @@ Keeps track of it's shuffled state.
 == FEATURES
 
 I used for the analysis of a project of mine, `otpr`.
-I have a copy of the analysis here[blob/master/ANALYSIS.txt].
+I have a copy of the analysis here[https://github.com/carlosjhr64/entropia/blob/master/ANALYSIS.txt].
 
 == INSTALL:
 
