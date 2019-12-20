@@ -1,9 +1,9 @@
-= entropia
+# entropia
 
-github :: https://www.github.com/carlosjhr64/entropia
-rubygems :: https://rubygems.org/gems/entropia
+* [github](https://www.github.com/carlosjhr64/entropia)
+* [rubygems](https://rubygems.org/gems/entropia)
 
-== DESCRIPTION:
+## DESCRIPTION:
 
 Creates random strings with different base alphabets and
 converts to and from.
@@ -13,56 +13,51 @@ Keeps track of the entropy content of the strings.
 Keeps track of the number of bits that were randomly generated.
 Keeps track of it's shuffled state.
 
-== SYNOPSIS:
+## SYNOPSIS:
 
-   > irb -I ./lib 
-   Welcome to IRB...
-   >> require 'entropia' #=> true
-   >> include ENTROPIA #=> Object
-   >> e0 = E[8] #=> "10000101"
-   >> e0.randomness #=> 0.0
-   >> e0.entropy #=> 256
-   >> e1 = E.new.pp(8,true){|n|rand(n)} #=> "11001101"
-   >> e1.randomness #=> 8.0
-   >> e1.entropy #=> 256
-   >> e = e0+e1 #=> "1000010111001101"
-   >> e.randomness #=> 8.0
-   >> e.entropy #=> 65536
-   >> e.shuffled? #=> false
-   >> f = e.shuffle #=> "1011101110010000"
-   >> f.shuffled? #=> true
-   >> f.randomness #=> 8.0
-   >> f.entropy #=> 65536
-   >> H #=> 16
-   >> fh = f*H #=> "BB90"
-   >> Q #=> 91
-   >> fq = f*Q #=> "(l^"
-   >> W #=> 62
-   >> fw = f*W #=> "CUS"
-   >> # SHA512 digest...
+    > irb -I ./lib 
+    Welcome to IRB...
+    >> require 'entropia' #=> true
+    >> include ENTROPIA #=> Object
+    >> e0 = E[8] #=> "10000101"
+    >> e0.randomness #=> 0.0
+    >> e0.entropy #=> 256
+    >> e1 = E.new.pp(8,true){|n|rand(n)} #=> "11001101"
+    >> e1.randomness #=> 8.0
+    >> e1.entropy #=> 256
+    >> e = e0+e1 #=> "1000010111001101"
+    >> e.randomness #=> 8.0
+    >> e.entropy #=> 65536
+    >> e.shuffled? #=> false
+    >> f = e.shuffle #=> "1011101110010000"
+    >> f.shuffled? #=> true
+    >> f.randomness #=> 8.0
+    >> f.entropy #=> 65536
+    >> H #=> 16
+    >> fh = f*H #=> "BB90"
+    >> Q #=> 91
+    >> fq = f*Q #=> "(l^"
+    >> W #=> 62
+    >> fw = f*W #=> "CUS"
+    >> # SHA512 digest...
     >   dfq = D[fq]
-   => "\xE9z\e\xCC\x8F\... ...\xB4\xC0\xB6\xB5\xAC\xE4d"
-   >> dfq.randomness #=> 8.0
-   >> dfq.bits #=> 16.0
-   >> dfq.length #=> 64
-   >> dfq.entropy #=> 65536
-   >> dfq*H
-   => "3A7D6F323F36B7345973F6... ...5A665A605B5AD67264"
+    => "\xE9z\e\xCC\x8F\... ...\xB4\xC0\xB6\xB5\xAC\xE4d"
+    >> dfq.randomness #=> 8.0
+    >> dfq.bits #=> 16.0
+    >> dfq.length #=> 64
+    >> dfq.entropy #=> 65536
+    >> dfq*H
+    => "3A7D6F323F36B7345973F6... ...5A665A605B5AD67264"
 
-== FEATURES
+## INSTALL:
 
-I used for the analysis of a project of mine, `otpr`.
-I have a copy of the analysis here[https://github.com/carlosjhr64/entropia/blob/master/ANALYSIS.txt].
+    > gem install entropia
 
-== INSTALL:
-
-  $ sudo gem install entropia
-
-== LICENSE:
+## LICENSE:
 
 (The MIT License)
 
-Copyright (c) 2014 CarlosJHR64
+Copyright (c) 2019 CarlosJHR64
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
