@@ -1,4 +1,5 @@
 # Standard Libraries
+require 'digest'
 require 'securerandom'
 
 # Gems
