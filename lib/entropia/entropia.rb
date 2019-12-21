@@ -1,60 +1,61 @@
 module ENTROPIA
-  class Entropia < String
+  Lb = lambda{|n| Math.log(n, 2)}
 
-    # Needs to be able to set the
-    # entropy capacity of the string
+  class Entropia < Number
+    # Needs to be able to set the entropy capacity of the string
     # without changing its current "value".
     def set_entropy(entropy)
+      unless entropy.is_a?(Integer) and entropy >= 0
+        raise "entropy request must be a non-negative Integer"
+      end
       # Sometimes we need to pad entropy back up.
       zero = @digits.first
-      while entropy > @base ** self.length
-        self.insert(0, zero)
-        @shuffled = false if @shuffled
+      while entropy > @base ** @string.length
+        @string.prepend zero
+        @shuffled &&= false
       end
-      @entropy = entropy
+      @entropy = @base ** @string.length
+    end
+
+    def set_randomness(randomness)
+      unless randomness.is_a?(Float) and randomness.between?(0.0, Lb[@entropy])
+        raise "randomness must be a Float in [0.0, Lb(entropy)]"
+      end
+      @randomness = randomness
+    end
+
+    def set_shuffled(shuffled)
+      case shuffled
+      when false, true
+        @shuffled = shuffled
+      else
+        raise "shuffle must be either true or false"
+      end
     end
 
     # This is the set_entropy version in bits.
     def set_bits(bits)
+      unless bits.is_a?(Integer) and bits >= 0
+        raise "bits request must be a non-negative Integer"
+      end
       set_entropy(2**bits)
     end
 
     # Needs to keep track of
-    # the base the entropy string is in,
-    # and how much entropy and randomness it contains.
-    attr_reader :base, :randomness, :shuffled, :entropy, :digits
-    def initialize(string='',
-                   base=2,
-                   randomness=0.0,
-                   shuffled=false,
-                   entropy=nil,
-                   digits=nil)
-      super(string)
-      @base       = base
-      @digits     = (digits)?  digits  :
-                    (@base>BaseConvert::DIGITS.length)? BaseConvert::QGRAPH :
-                     BaseConvert::DIGITS
-      @randomness = randomness
-      set_entropy((entropy)? entropy : base ** self.length)
-      @shuffled = shuffled
-    end
-
-    def self.novi(string, o, h={})
-      Entropia.new(string,
-                   h[:b] || h[:base]       || o.base       || 2,
-                   h[:r] || h[:randomness] || o.randomness || 0.0,
-                   [h[:s], h[:shuffled], o.shuffled, false].detect{|f| !f.nil?},
-                   h[:e] || h[:entropy]    || o.entropy,
-                   h[:d] || h[:digits]     || o.digits)
-    end
-
-    def self.nuevo(string, h)
-      Entropia.new(string,
-                   h[:b] || h[:base]       || 2,
-                   h[:r] || h[:randomness] || 0.0,
-                   [h[:s], h[:shuffled], false].detect{|f| !f.nil?},
-                   h[:e] || h[:entropy],
-                   h[:d] || h[:digits])
+    # the base the entropy string is in, and
+    # how much entropy and randomness it contains.
+    # Interpret entropy as a request for a bigger string if string is too short.
+    attr_reader :randomness, :shuffled, :entropy
+    def initialize(number = 0,
+                   base: 2,
+                   entropy: 0,
+                   randomness: 0.0,
+                   shuffled: false,
+                   digits: nil)
+      super(number, base: base, digits: digits)
+      set_entropy(entropy)
+      set_randomness(randomness)
+      set_shuffled(shuffled)
     end
 
     # Entropy capacity is often measured in "bits",
@@ -65,92 +66,122 @@ module ENTROPIA
 
     # Needs to be able to increase
     # the entropy in the string.
-    def increase(n=1, random=false)
+    def increase(n=1, random: false, &block)
+      raise "need block random number generator" if random and block.nil?
       @shuffled = false unless random
-      if block_given?
-        n.times{self<<@digits[yield(@base)]}
+      if block
+        n.times{@string << @digits[block.call(@base)]}
         @randomness += n*Lb[@base] if random
       else
-        n.times{self<<@digits[SecureRandom.random_number(@base)]}
+        n.times{@string << @digits[SecureRandom.random_number(@base)]}
         # Note that because rand is pseudo, we don't increment randomness.
       end
       # We can revaluate entropy as a whole.
-      @entropy = @base ** self.length
+      @entropy = @base ** @string.length
       self
     end
     alias pp increase
 
-    # The operator for base convert.
-    def convert(n, digits=nil)
-      b = BaseConvert.new(@base, n)
-      # Ensure the choice of digits
-      (digits)? (b.to_digits=digits) : (digits=b.to_digits)
-      b.from_digits = @digits
-      return Entropia.novi(b.convert(self.to_s), self, :b=>n, :d=>digits)
+    # The method for base convert.
+    def to_base(base, digits=@digits)
+      Entropia.new(@integer,
+                   base:       base,
+                   entropy:    @entropy,
+                   randomness: @randomness,
+                   shuffled:   @shuffled,
+                   digits:     digits)
+    end
+
+    # The method for change of digits.
+    def to_digits(digits, base=@base)
+      Entropia.new(@integer,
+                   base:       base,
+                   entropy:    @entropy,
+                   randomness: @randomness,
+                   shuffled:   @shuffled,
+                   digits:     digits)
     end
 
     def *(n)
-      convert(n)
+      to_base(n)
     end
 
-    # We need to convert our given s to our base
-    # before concatination and then
-    # create the new entropy object in our base.
-    def +(s)
-      r = @randomness + s.randomness
-      f = @shuffled and s.shuffled
-      e = @entropy * s.entropy
-      s = s*@base unless @base == s.base
-      return Entropia.novi(super(s), self, :r=>r, :s=>f, :e=>e)
-    end
-
-    # Entropia objects representing the same value should be equal eachother.
-    def ==(e)
-      e = e*@base unless e.base == @base
-      self.to_s == e.to_s
-    end
-
-    # xor
-    def ^(b)
-      r = [@randomness, b.randomness].min
-      f = @shuffled and b.shuffled
-      e = [@entropy,    b.entropy].min
-
-      a = (@base==2)?  self : self*2
-      z, u = a.digits[0], a.digits[1]
-
-      b = (b.base==2)? b    : b.convert(2, [z, u])
-
-      a = a.chars
-      l = a.length
-      i = -1
-      s = b.chars.inject('') do |s, c|
-        i += 1
-        y = (a[i%l].to_s==u)
-        x = (c.to_s==u)
-        s+((x^y)? u : z)
+    # We need to convert to a common base and digits
+    # before concatenation and then
+    # create the new entropy object.
+    def +(y)
+      x = self
+      unless x.base == y.base and  x.digits == y.digits
+        digits = (y.digits.length > x.digits.length)? y.digits : x.digits
+        base   = (y.base > x.base)?                   y.base   : x.base
+        x = x.to_base(base, digits)
+        y = y.to_base(base, digits)
       end
-
-      s = Entropia.new(s, 2, r, f, e, [z, u])
-      s = s.convert(@base, @digits) unless @base==2
-
-      return s
+      string = x.string + y.string
+      b = x.base # or y.base # same
+      e = x.entropy * y.entropy
+      r = x.randomness + y.randomness
+      f = x.shuffled and y.shuffled
+      d = x.digits # or y.digits # same
+      Entropia.new(string,
+                   base:       b,
+                   entropy:    e,
+                   randomness: r,
+                   shuffled:   f,
+                   digits:     d)
     end
+
+    # Entropia objects representing the same values should be equal eachother.
+    def ==(e)
+      @integer      == e.integer    and
+        @entropy    == e.entropy    and
+        @randomness == e.randomness and
+        @shuffled   == e.shuffled
+    end
+
+    # TODO
+    # xor
+#   def ^(b)
+#     r = [@randomness, b.randomness].min
+#     f = @shuffled and b.shuffled
+#     e = [@entropy,    b.entropy].min
+
+#     a = (@base==2)?  self : self*2
+#     z, u = a.digits[0], a.digits[1]
+
+#     b = (b.base==2)? b    : b.convert(2, [z, u])
+
+#     a = a.chars
+#     l = a.length
+#     i = -1
+#     s = b.chars.inject('') do |s, c|
+#       i += 1
+#       y = (a[i%l].to_s==u)
+#       x = (c.to_s==u)
+#       s+((x^y)? u : z)
+#     end
+
+#     s = Entropia.new(s, 2, r, f, e, [z, u])
+#     s = s.convert(@base, @digits) unless @base==2
+
+#     return s
+#   end
 
     def shuffled?
-      @shuffled==true
+      @shuffled
     end
 
-    def shuffle
-      s = (@base==2)? self : self*2
-      # I think that with a good enough random number generator
-      # for the shuffle and truly random bits, this should suffice.
-      s = s.to_s.chars.shuffle.join
-      s = Entropia.novi(s, self, :b=>2, :s=>true)
-      s = s*@base unless @base==2
+    # TODO
+#   def shuffle
+#     s = (@base==2)? self : self*2
+#     # I think that with a good enough random number generator
+#     # for the shuffle and truly random bits, this should suffice.
+#     s = s.to_s.chars.shuffle.join
+#     s = Entropia.novi(s, self, :b=>2, :s=>true)
+#     s = s*@base unless @base==2
 
-      return s
-    end
+#     return s
+#   end
 
     # The mathematical notation should be as terse as possible.
     # This will contruct a new entropy string.

@@ -9,7 +9,6 @@ require 'base_convert'
 module ENTROPIA
   VERSION = '0.1.191220'
 
-  require 'entropia/lb'
   require 'entropia/digest'
   require 'entropia/entropia'
 end

@@ -257,7 +257,7 @@
   #=> 256
   # or you can do...
   s1 = E[0]
-  s1.pp(256, true){|n| rand(n)} # pp aliases increase
+  s1.pp(256, random: true){|n| rand(n)} # pp aliases increase
   s1.randomness
   #=> 256
 
@@ -369,7 +369,7 @@
   s0 = E[256]
   s0.randomness
   #=> 0
-  s1 = E.new.pp(256, true){|n| rand(n)}
+  s1 = E.new.pp(256, random: true){|n| rand(n)}
   s1.randomness
   #=> 256
 
