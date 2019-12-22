@@ -64,17 +64,16 @@ module ENTROPIA
       Lb[@entropy]
     end
 
-    # Needs to be able to increase
-    # the entropy in the string.
-    def increase(n=1, random: false, &block)
-      raise "need block random number generator" if random and block.nil?
-      @shuffled = false unless random
+    # Increase the entropy in the string.
+    # Assume that if a block is given, it's random unless explicitly denied.
+    def increase(n=1, random: true)
       if block
         n.times{@string << @digits[block.call(@base)]}
-        @randomness += n*Lb[@base] if random
+        random ?  @randomness += n*Lb[@base]  :  @shuffled = false
       else
-        n.times{@string << @digits[SecureRandom.random_number(@base)]}
         # Note that because rand is pseudo, we don't increment randomness.
+        @shuffled = false
+        n.times{@string << @digits[SecureRandom.random_number(@base)]}
       end
       # We can revaluate entropy as a whole.
       @entropy = @base ** @string.length
