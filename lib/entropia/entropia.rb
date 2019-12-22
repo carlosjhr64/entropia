@@ -105,10 +105,8 @@ module ENTROPIA
       to_base(n)
     end
 
-    # We need to convert to a common base and digits
-    # before concatenation and then
-    # create the new entropy object.
-    def +(y)
+    # Return self and y as an x,y pair with common base and digits.
+    def _x_(y)
       x = self
       unless x.base == y.base and  x.digits == y.digits
         digits = (y.digits.length > x.digits.length)? y.digits : x.digits
@@ -116,7 +114,15 @@ module ENTROPIA
         x = x.to_base(base, digits)
         y = y.to_base(base, digits)
       end
-      string = x.string + y.string
+      return x,y
+    end
+
+    # We need to convert to a common base and digits
+    # before concatenation and then
+    # create the new entropy object.
+    def +(y)
+      x,y = _x_(y)
+      string = x.to_s + y.to_s
       b = x.base # or y.base # same
       e = x.entropy * y.entropy
       r = x.randomness + y.randomness
@@ -132,39 +138,32 @@ module ENTROPIA
 
     # Entropia objects representing the same values should be equal eachother.
     def ==(e)
-      @integer      == e.integer    and
+      @integer      == e.to_i       and
         @entropy    == e.entropy    and
         @randomness == e.randomness and
         @shuffled   == e.shuffled
     end
 
-    # TODO
     # xor
-#   def ^(b)
-#     r = [@randomness, b.randomness].min
-#     f = @shuffled and b.shuffled
-#     e = [@entropy,    b.entropy].min
+    def ^(y)
+      x,y = _x_(y)
+      x,y = y,x  if x.entropy > y.entropy
 
-#     a = (@base==2)?  self : self*2
-#     z, u = a.digits[0], a.digits[1]
+      s,l = '',xbits.length
+      xbits = x.to_base(2, '01').to_s.chars.map{|_|_.ord - 48}
+      ybits = y.to_base(2, '01').to_s.chars.map{|_|_.ord - 48}
+      ybits.each_with_index do |ybit, i|
+        s << (xbits[i%l] ^ ybit).to_s
+      end
 
-#     b = (b.base==2)? b    : b.convert(2, [z, u])
-
-#     a = a.chars
-#     l = a.length
-#     i = -1
-#     s = b.chars.inject('') do |s, c|
-#       i += 1
-#       y = (a[i%l].to_s==u)
-#       x = (c.to_s==u)
-#       s+((x^y)? u : z)
-#     end
-
-#     s = Entropia.new(s, 2, r, f, e, [z, u])
-#     s = s.convert(@base, @digits) unless @base==2
-
-#     return s
-#   end
+      Entropia.new(s,
+                   base:       2,
+                   entropy:    [x.entropy, y.entropy].min,
+                   randomness: [x.randomness, y.randomness].min,
+                   shuffled:   (x.shuffled and y.shuffled),
+                   digits:     '01'
+                  ).to_base(x.base, x.digits)
+    end
 
     def shuffled?
       @shuffled
