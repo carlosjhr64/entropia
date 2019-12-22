@@ -1,7 +1,7 @@
 module ENTROPIA
   Lb = lambda{|n| Math.log(n, 2)}
 
-  class Entropia < Number
+  class Entropia < BaseConvert::Number
     # Needs to be able to set the entropy capacity of the string
     # without changing its current "value".
     def set_entropy(entropy)
@@ -9,7 +9,7 @@ module ENTROPIA
         raise "entropy request must be a non-negative Integer"
       end
       # Sometimes we need to pad entropy back up.
-      zero = @digits.first
+      zero = @digits[0]
       while entropy > @base ** @string.length
         @string.prepend zero
         @shuffled &&= false
@@ -45,7 +45,7 @@ module ENTROPIA
     # the base the entropy string is in, and
     # how much entropy and randomness it contains.
     # Interpret entropy as a request for a bigger string if string is too short.
-    attr_reader :randomness, :shuffled, :entropy
+    attr_reader :randomness, :entropy
     def initialize(number = 0,
                    base: 2,
                    entropy: 0,
@@ -64,18 +64,17 @@ module ENTROPIA
       Lb[@entropy]
     end
 
+    # TODO: @integer problem! prepend string?
     # Increase the entropy in the string.
-    # Assume that if a block is given, it's random unless explicitly denied.
-    def increase(n=1, random: true)
-      if block
-        n.times{@string << @digits[block.call(@base)]}
-        random ?  @randomness += n*Lb[@base]  :  @shuffled = false
+    def increase(n=1, random: SecureRandom)
+      if random
+        n.times{@string << @digits[random.random_number(@base)]}
+        @randomness += n*Lb[@base]
       else
-        # Note that because rand is pseudo, we don't increment randomness.
+        n.times{@string << @digits[0]}
         @shuffled = false
-        n.times{@string << @digits[SecureRandom.random_number(@base)]}
       end
-      # We can revaluate entropy as a whole.
+      # Revaluate entropy as a whole.
       @entropy = @base ** @string.length
       self
     end
@@ -169,11 +168,11 @@ module ENTROPIA
       @shuffled
     end
 
-    def shuffle
+    def shuffle(random: SecureRandom)
       s = (@base==2)? self : self*2
       # I think that with a good enough random number generator
       # for the shuffle and truly random bits, this should suffice.
-      s = s.to_s.chars.shuffle.join
+      s = s.to_s.chars.shuffle(random: rng).join
       s = Entropia.new(s,
                        base:       2,
                        entropy:    @entropy,
