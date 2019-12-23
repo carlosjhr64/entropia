@@ -58,6 +58,15 @@ module ENTROPIA
       set_shuffled(shuffled)
     end
 
+    def randomize!(random: SecureRandom)
+      @integer = random.random_number(@entropy)
+      @randomness = Lb[@entropy]
+      @shuffled = false
+      @string = tob
+      set_entropy(@entropy)
+      self
+    end
+
     # Entropy capacity is often measured in "bits",
     # a logarithmic value of entropy.
     def bits
@@ -65,7 +74,7 @@ module ENTROPIA
     end
 
     # Increase the entropy in the string.
-    def increase(n=1, random: SecureRandom)
+    def increase!(n=1, random: nil)
       if random
         n.times{@string.prepend @digits[random.random_number(@base)]}
         @randomness += n*Lb[@base]
@@ -78,7 +87,7 @@ module ENTROPIA
       @entropy = @base ** @string.length
       self
     end
-    alias pp increase
+    alias p! increase!
 
     # The method for base convert.
     def to_base(base, digits=@digits)
@@ -172,7 +181,7 @@ module ENTROPIA
       s = (@base==2)? self : self*2
       # I think that with a good enough random number generator
       # for the shuffle and truly random bits, this should suffice.
-      s = s.to_s.chars.shuffle(random: rng).join
+      s = s.to_s.chars.shuffle(random: random).join
       s = Entropia.new(s,
                        base:       2,
                        entropy:    @entropy,
