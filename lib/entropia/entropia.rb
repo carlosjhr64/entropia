@@ -64,14 +64,14 @@ module ENTROPIA
       Lb[@entropy]
     end
 
-    # TODO: @integer problem! prepend string?
     # Increase the entropy in the string.
     def increase(n=1, random: SecureRandom)
       if random
-        n.times{@string << @digits[random.random_number(@base)]}
+        n.times{@string.prepend @digits[random.random_number(@base)]}
         @randomness += n*Lb[@base]
+        @integer = toi
       else
-        n.times{@string << @digits[0]}
+        n.times{@string.prepend @digits[0]}
         @shuffled = false
       end
       # Revaluate entropy as a whole.
