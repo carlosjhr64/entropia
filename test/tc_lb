@@ -11,5 +11,4 @@ class TestLb < Test::Unit::TestCase
     assert_equal 3.0, Lb[8]
     assert_equal 4.0, Lb[2**4]
   end
-
 end
