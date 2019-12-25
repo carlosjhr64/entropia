@@ -39,6 +39,7 @@ module ENTROPIA
         raise "bits request must be a non-negative Integer"
       end
       set_entropy(2**bits)
+      bits
     end
 
     # Needs to keep track of
@@ -46,7 +47,7 @@ module ENTROPIA
     # how much entropy and randomness it contains.
     # Interpret entropy as a request for a bigger string if string is too short.
     attr_reader :randomness, :entropy
-    def initialize(number = 0,
+    def initialize(number = '',
                    base: 2,
                    entropy: 0,
                    randomness: 0.0,
@@ -73,7 +74,7 @@ module ENTROPIA
       Lb[@entropy]
     end
 
-    # Increase the entropy in the string.
+    # Increase the length of the string.
     def increase!(n=1, random: nil)
       if random
         n.times{@string.prepend @digits[random.random_number(@base)]}
@@ -134,7 +135,7 @@ module ENTROPIA
       b = x.base # or y.base # same
       e = x.entropy * y.entropy
       r = x.randomness + y.randomness
-      f = x.shuffled and y.shuffled
+      f = x.shuffled? and y.shuffled?
       d = x.digits # or y.digits # same
       Entropia.new(string,
                    base:       b,
@@ -149,7 +150,7 @@ module ENTROPIA
       @integer      == e.to_i       and
         @entropy    == e.entropy    and
         @randomness == e.randomness and
-        @shuffled   == e.shuffled
+        @shuffled   == e.shuffled?
     end
 
     # xor
@@ -168,7 +169,7 @@ module ENTROPIA
                    base:       2,
                    entropy:    [x.entropy, y.entropy].min,
                    randomness: [x.randomness, y.randomness].min,
-                   shuffled:   (x.shuffled and y.shuffled),
+                   shuffled:   (x.shuffled? and y.shuffled?),
                    digits:     '01'
                   ).to_base(x.base, x.digits)
     end
@@ -204,5 +205,6 @@ module ENTROPIA
   O = 8
   H = 16
   W = 62
+  B = 64
   Q = 91
 end

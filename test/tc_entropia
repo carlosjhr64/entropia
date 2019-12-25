@@ -6,162 +6,158 @@ class TestEntropia < Test::Unit::TestCase
   include ENTROPIA
 
   def test_001_new
-    s = nil
-    assert_nothing_raised(Exception){ s = Entropia.new }
-    assert_equal '0',   s.to_s
-    assert_equal 2,     s.base
-    assert_equal 0,     s.randomness
-    assert_equal false, s.shuffled?
-    assert_equal 2,     s.entropy
-    assert_equal 1.0,   s.bits
-
-   #a = Entropia.new('0000')
-   #assert_equal 2,     a.base
-   #assert_equal 2**4,     a.entropy
-
-   #b = Entropia.new('0000', 2, 0, false, 2, ['0', '1'])
-   #assert_equal 2,     b.base
-   #assert_equal 2,     b.entropy
-
-   #c = Entropia.nuevo('0000', :entropy => 2)
-   #assert_equal 2,     c.base
-   #assert_equal 2,     c.entropy
-
-   #d = Entropia.novi('0000', c)
-   #assert_equal 2,     d.base
-   #assert_equal 2,     d.entropy
-   #assert_equal 0,     d.randomness
-
-   #e = Entropia.novi('0000', d, {:randomness => 1})
-   #assert_equal 2,     e.base
-   #assert_equal 2,     e.entropy
-   #assert_equal 1,     e.randomness
-
-   #f = Entropia.novi('0000', e, {:r => 3})
-   #assert_equal 2,     f.base
-   #assert_equal 2,     f.entropy
-   #assert_equal 3,     f.randomness
+    assert_nothing_raised(Exception) do
+      e = Entropia.new
+      assert_equal 0,      e.to_i
+      assert_equal '',     e.to_s
+      assert_equal 2,      e.base
+      assert_equal 1,      e.entropy
+      assert_equal 0.0,    e.bits
+      assert_equal 0,      e.randomness
+      assert_equal false,  e.shuffled?
+      assert_equal BaseConvert::Configuration::WORD, e.digits
+    end
+    assert_nothing_raised(Exception) do
+      e = Entropia.new '0000'
+      assert_equal 0,      e.to_i
+      assert_equal '0000', e.to_s
+      assert_equal 2,      e.base
+      assert_equal 2**4,   e.entropy
+      assert_equal 4.0,    e.bits
+      assert_equal 0,      e.randomness
+      assert_equal false,  e.shuffled?
+      assert_equal BaseConvert::Configuration::WORD, e.digits
+    end
+    assert_nothing_raised(Exception) do
+      e = Entropia.new 1, entropy: 8, digits: 'ab'
+      assert_equal 1,      e.to_i
+      assert_equal 'aab',  e.to_s
+      assert_equal 2,      e.base
+      assert_equal 2**3,   e.entropy
+      assert_equal 3.0,    e.bits
+      assert_equal 0,      e.randomness
+      assert_equal false,  e.shuffled?
+      assert_equal 'ab',   e.digits
+    end
   end
 
   def test_002_set_entropy
-   #s = Entropia.new
-   #assert_equal 0, s.length
+    e = Entropia.new
+    assert_equal '', e.to_s
 
-   #e = s.set_entropy(2**16)
-   #assert_equal 16,                 s.length
-   #assert_equal e,                  s.entropy
-   #assert_equal 2**16,              s.entropy
-   #assert_equal '0000000000000000', s.to_s
+    e.set_entropy(2**16)
+    assert_equal '0000000000000000', e.to_s
+    assert_equal 2**16, e.entropy
+    assert_equal 16.0, e.bits
 
-   #s = Entropia.nuevo('', :d => ['!','+'], :s => true)
-   #assert_equal 0,    s.length
-   #assert_equal true, s.shuffled
+    e = Entropia.new '', digits: '!+', shuffled: true
+    assert_equal true, e.shuffled?
 
-   #e = s.set_entropy(2**16)
-   #assert_equal false,              s.shuffled
-   #assert_equal 16,                 s.length
-   #assert_equal e,                  s.entropy
-   #assert_equal 2**16,              s.entropy
-   #assert_equal '!!!!!!!!!!!!!!!!', s.to_s
+    e.set_entropy(2**16)
+    assert_equal false, e.shuffled?
+    assert_equal '!!!!!!!!!!!!!!!!', e.to_s
   end
 
   def test_003_set_bits
-   #s = Entropia.new
-   #assert_equal 0, s.length
-   #e = s.set_bits(16)
+   e = Entropia.new
+   assert_equal '', e.to_s
 
-   #assert_equal 16,                 s.length
-   #assert_equal e,                  s.entropy
-   #assert_equal 2**16,              s.entropy
-   #assert_equal '0000000000000000', s.to_s
+   e.set_bits(16)
+   assert_equal 16.0, e.bits
+   assert_equal '0000000000000000', e.to_s
+   assert_equal 2**16, e.entropy
   end
 
   def test_004_increase
-   #s = Entropia.new
-   #assert_nothing_raised(Exception){ s.increase(4) }
-   #assert_equal 4,     s.length
-   #assert_equal 2,     s.base
-   #assert_equal 0,     s.randomness
-   #assert_equal false, s.shuffled
-   #assert_equal 2**4,  s.entropy
-   #assert_equal 4.0,   s.bits
+    e = Entropia.new base: 16
+    assert_equal '', e.to_s
 
-   #s = Entropia.nuevo('', :s=>true)
-   #assert_equal true, s.shuffled
-   #s.increase(4)
-   #assert_equal false, s.shuffled
+    e.increase!(3)
+    assert_equal 3,     e.to_s.length
+    assert_equal 16,    e.base
+    assert_equal 0,     e.randomness
+    assert_equal false, e.shuffled?
+    assert_equal 16**3, e.entropy
+    assert_equal 12.0,  e.bits
+
+    e = Entropia.new(shuffled: true)
+    assert_equal true, e.shuffled?
+    e.increase!(4)
+    assert_equal false, e.shuffled?
   end
 
   def test_005_pp # alias of increase
-   #s = Entropia.new
-   #assert_nothing_raised(Exception){ s.pp }
-   #assert_nothing_raised(Exception){ s.pp }
-   #a = s.pp
-   #assert_equal a,      s
-   #assert_equal a.to_s, s.to_s
-   #assert_equal 3,      s.length
-   #assert_equal 2,      s.base
-   #assert_equal 0,      s.randomness
-   #assert_equal false,  s.shuffled
-   #assert_equal 2**3,   s.entropy
-   #assert_equal 3.0,    s.bits
+    a = Entropia.new
+    a.p!
+    b = Entropia.new
+    b.p!
+    assert_equal a, b
+    assert_equal b, a
+
+    b = b.p!
+    e = a.p!
+    assert_equal a, e
+    assert_equal b, e
+
+    assert_equal a.to_s, e.to_s
+    assert_equal 2,      e.to_s.length
+    assert_equal 2,      e.base
+    assert_equal 0,      e.randomness
+    assert_equal false,  e.shuffled?
+    assert_equal 2**2,   e.entropy
+    assert_equal 2.0,    e.bits
+
+    assert_equal true, (a==e)
+    a.set_shuffled true
+    # Remember that a and e are the same instance
+    assert_equal true, (a==e)
+    # But b is a different instance.
+    assert_equal false, (b==e)
   end
 
-  def test_006_pp_block
-   #s = Entropia.new
-   #a = s.pp(6){ 0 }
-   #assert_equal a,        s
-   #assert_equal a.to_s,   s.to_s
-   #assert_equal 6,        s.length
-   #assert_equal '000000', s.to_s
-   #assert_equal 2,        s.base
-   #assert_equal 0,        s.randomness
-   #assert_equal false,    s.shuffled
-   #assert_equal 2**6,     s.entropy
-   #assert_equal 6.0,      s.bits
-  end
+  def test_006_pp_rng
+    rng = Object.new
+    def rng.random_number(_); 10; end
+    e = Entropia.new base: 16
+    e.p!(6, random: rng)
 
-  def test_007_pp_true_block
-   #s = Entropia.new
-   #a = s.pp(5, true){ 1 } # as truly random (we lie)
-   #assert_equal a,       s
-   #assert_equal a.to_s,  s.to_s
-   #assert_equal 5,       s.length
-   #assert_equal '11111', s.to_s
-   #assert_equal 2,       s.base
-   #assert_equal 5,       s.randomness
-   #assert_equal false,   s.shuffled
-   #assert_equal 2**5,    s.entropy
-   #assert_equal 5.0,     s.bits
-
-   #s = Entropia.nuevo('', :s=>true)
-   #assert_equal true, s.shuffled
-   #a = s.pp(5, true){ 1 } # as truly random (we lie)
-   #assert_equal true, s.shuffled
+    assert_equal 'AAAAAA', e.to_s
+    assert_equal 16,       e.base
+    # we assume rng is a source of randomness...
+    assert_equal 24.0,     e.randomness
+    assert_equal false,    e.shuffled?
+    assert_equal 16**6,    e.entropy
+    assert_equal 24.0,     e.bits
   end
 
   def test_008_convert_base
-   #s = Entropia.new.increase(16)
-   #assert_equal 16, s.length
+    e = Entropia.new.increase!(32, random: SecureRandom)
+    assert_equal 16, H
+    eh = e*H
 
-   #sh = s*16
-   #assert_equal 4, sh.length
-   #refute_nil s=~/^[01]{16}$/
-   #refute_nil sh=~/^[\dABCDEF]{4}$/
-
-   #s = Entropia.new.increase(16){1}
-   #sh = s*16
-   #assert_equal 'FFFF', sh.to_s
+    assert_equal 32, e.to_s.length
+    assert_equal 8, eh.to_s.length
+    # e and eh represent the same entropy
+    assert_equal e, eh
+    assert e==eh
   end
 
   def test_009_convert_base_conservation
-   #s = Entropia.new.increase(8, true){ rand(2) }
-   #sh = s*16
-   #assert_equal 2,     sh.length
-   #assert_equal 8,     sh.randomness
-   #assert_equal false, sh.shuffled
-   #assert_equal 16,    sh.base
-   #assert_equal 2**8,  sh.entropy
+    # Random.new(0) #radom_number(2) => 0,1,1,0,1,1,1,1
+    e = E.new.p!(8, random: Random.new(0))
+    # Remember that new entropia prepends the string...
+    assert_equal '11110110', e.to_s
+    eh = e*H # e*16
+    assert_equal 2,     eh.to_s.length
+    assert_equal 8,     eh.randomness
+    assert_equal false, eh.shuffled?
+    assert_equal 16,    eh.base
+    assert_equal 2**8,  eh.entropy
+    # '11110110'.to_i(2) == 246
+    assert_equal 246, e.to_i
+    assert_equal 246, eh.to_i
+    # 246.to_s(16) == 'F6'.downcase
+    assert_equal 'F6', eh.to_s
   end
 
   def test_010_concat_2_by_2
