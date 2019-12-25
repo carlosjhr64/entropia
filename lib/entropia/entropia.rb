@@ -196,7 +196,11 @@ module ENTROPIA
     # The mathematical notation should be as terse as possible.
     # This will contruct a new entropy string.
     def self.[](n)
-      Entropia.new.pp(n)
+      if block_given?
+        Entropia.new.p!(n, random: yield)
+      else
+        Entropia.new.p!(n)
+      end
     end
   end
 

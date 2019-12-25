@@ -160,37 +160,93 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 'F6', eh.to_s
   end
 
-  def test_010_concat_2_by_2
-   #s0 = Entropia.new.increase(4, true){  0 }
-   #s1 = Entropia.new.increase(4, false){ 1 }
-   #s = nil
-   #assert_nothing_raised(Exception){ s = s0 + s1 }
-   #assert_equal 8,     s.length
-   #assert_equal 2,     s.base
-   #assert_equal 2**8,  s.entropy
-   #assert_equal 4,     s.randomness
-   #assert_equal false, s.shuffled
+  def test_010_concat_binary
+    e0 = E.new.p!(4, random: Random.new(0)) #=> '0110' as random
+    assert_equal '0110', e0.to_s
+    assert_equal 4.0, e0.randomness
+
+    e1 = E.new('0011') #=> '0011' definitely not random
+    assert_equal '0011', e1.to_s
+    assert_equal 0.0, e1.randomness
+
+    e = e0+e1
+    assert_equal '01100011', e.to_s
+    assert_equal 8.0, e.bits
+    assert_equal 4.0, e.randomness
+    assert_equal false, e.shuffled?
+
+    f = e.shuffle
+    if f.to_s==e.to_s # unlikely... 1:256
+      f = e.shuffle # u
+    end
+    # f.to_s==e.to_s now very unlikely... 1:65536
+    refute_equal '01100011', f.to_s
+    assert_equal 8.0, f.bits
+    assert_equal 4.0, f.randomness
+    assert_equal true, f.shuffled?
   end
 
-  def test_011_concat_16_by_8
-   #s0 = Entropia.new.increase(4)*16
-   #assert_equal 16, s0.base
-   #s1 = Entropia.new.increase(4)*8
-   #assert_equal 8, s1.base
+  def test_011_concat_mix
+    eb = E.new('0101010101010101')
+    assert_equal 2, eb.base
+    assert_equal 2**16, eb.entropy
+    assert_equal '0101010101010101', eb.to_s
+    assert_equal 0.0, eb.randomness
+    assert_equal 16.0, eb.bits
+    assert_equal false, eb.shuffled?
 
-   #s01 = s0 + s1
-   #assert_equal 16, s01.base
-   #assert_equal 2,  s01.length
+    eh = E[32]{SecureRandom}*H
+    assert_equal 16, eh.base
+    assert_equal 2**32, eh.entropy
+    assert_equal 8, eh.to_s.length
+    assert_equal 32.0, eh.randomness
+    assert_equal 32.0, eh.bits
+    assert_equal false, eh.shuffled?
 
-   #s10 = s1 + s0
-   #assert_equal 8, s10.base
-   #assert_equal 4, s10.length
+    e = eb + eh
+    s = '5555'+eh.to_s
+    assert_equal s, e.to_s
 
-   #assert_equal 2**8, s01.entropy
-   #assert_equal 2**8, s10.entropy
+    assert_equal 16, e.base
+    assert_equal((2**32)*(2**16), e.entropy)
+    assert_equal 16**12, e.entropy
+    assert_equal Lb[16**12], e.bits
+    assert_equal 48.0, e.bits
+    assert_equal 12, e.to_s.length
+    assert_equal 32.0, e.randomness
+    assert_equal false, e.shuffled?
+  end
 
-   #assert_equal false, s01.shuffled
-   #assert_equal false, s10.shuffled
+  def test_011_concat_nuts
+    eh = E.new(base: 16).p!(7, random: Random.new(0))
+    assert_equal 16, eh.base
+    assert_equal 16**7, eh.entropy
+    assert_equal 7, eh.to_s.length
+    assert_equal BaseConvert::Configuration::WORD, eh.digits
+
+    assert_equal 28.0, eh.randomness
+    assert_equal false, eh.shuffled?
+
+    eq = E.new(digits: :q).p!(11)
+    assert_equal 2, eq.base
+    assert_equal 2**11, eq.entropy
+    assert_equal 11, eq.to_s.length
+    assert_equal BaseConvert::Configuration::QGRAPH, eq.digits
+
+    assert_equal 0.0, eq.randomness
+    assert_equal false, eq.shuffled?
+
+    e = (eq+eh).shuffle
+    assert_equal 16, e.base
+    assert_equal BaseConvert::Configuration::QGRAPH, e.digits
+    assert e.shuffled?
+    length = Math.log(16**7 * 2**11, 16).ceil
+    assert length == 10 # length is 10
+    assert_equal length, e.to_s.length
+    assert_equal 16**length, e.entropy
+
+    assert_equal 28.0, e.randomness
+    assert_equal true, e.shuffled?
   end
 
   def test_012_equal
