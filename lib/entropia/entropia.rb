@@ -59,7 +59,7 @@ module ENTROPIA
       set_shuffled(shuffled)
     end
 
-    def randomize!(random: SecureRandom)
+    def randomize!(random: Random)
       @integer = random.random_number(@entropy)
       @randomness = Lb[@entropy]
       @shuffled = false
@@ -178,7 +178,7 @@ module ENTROPIA
       @shuffled
     end
 
-    def shuffle(random: SecureRandom)
+    def shuffle(random: Random)
       s = (@base==2)? self : self*2
       # I think that with a good enough random number generator
       # for the shuffle and truly random bits, this should suffice.

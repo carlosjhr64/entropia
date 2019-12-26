@@ -131,7 +131,7 @@ class TestEntropia < Test::Unit::TestCase
   end
 
   def test_008_convert_base
-    e = Entropia.new.increase!(32, random: SecureRandom)
+    e = Entropia.new.increase!(32, random: Random)
     assert_equal 16, H
     eh = e*H
 
@@ -195,7 +195,7 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 16.0, eb.bits
     assert_equal false, eb.shuffled?
 
-    eh = E[32]{SecureRandom}*H
+    eh = E[32]{Random}*H
     assert_equal 16, eh.base
     assert_equal 2**32, eh.entropy
     assert_equal 8, eh.to_s.length
@@ -251,7 +251,7 @@ class TestEntropia < Test::Unit::TestCase
 
   def test_012_equal
     # For this to work,
-    # entropy must be "congruent" among the different bases used...
+    # entropy must be "commensarable" among the different bases used...
 
     # Can *NOT* use entropy 2**11 among bases 2, 8, and 16:
     refute((_=Math.log(2**11, 16))==_.to_i)
@@ -288,32 +288,32 @@ class TestEntropia < Test::Unit::TestCase
   end
 
   def test_013_notation
-    e = E[256]{SecureRandom}
+    e = E[256]{Random}
     value = e.to_i
     assert_equal 256, e.to_s.length
 
-    # Congruent base combo
+    # Commensurable base combo
     assert((_=Math.log(2**256, 16))==_.to_i)
     h = e*H
     assert_equal 16, h.base
     assert_equal value, h.to_i
     assert h==e
 
-    # Non-Congruent base combo
+    # Non-Commensurable base combo
     refute((_=Math.log(2**256, 8))==_.to_i)
     o = e*O
     assert_equal 8, o.base
     assert_equal value, o.to_i
     refute o==e
 
-    # Non-Congruent base combo
+    # Non-Commensurable base combo
     refute((_=Math.log(2**256, 91))==_.to_i)
     q = e.to_base(Q, BaseConvert::Configuration::QGRAPH)
     assert_equal 91, q.base
     assert_equal value, q.to_i
     refute q==e
 
-    # Non-Congruent base combo
+    # Non-Commensurable base combo
     refute((_=Math.log(2**256, 62))==_.to_i)
     w = e*W
     assert_equal 62, w.base

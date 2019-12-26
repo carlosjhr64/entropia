@@ -1,60 +1,29 @@
 module ENTROPIA
-  DIGEST = {}
-  DIGEST[:D] = Digest::SHA512
-  DIGEST[:C] = Digest::MD5
+  class Entropia
+    def digest(d=Digest::SHA2.new(256))
+      string = d.hexdigest @string
+      Entropia.new(string,
+                   base: 16,
+                   # entropy becomes that in string
+                   randomness: [256.0, @randomness].min,
+                   shuffled: true,
+                   digits: '0123456789abcdef').to_base(@base, @digits)
+    end
 
-  module Extensions
-    attr_accessor :base, :randomness, :shuffled, :entropy, :digits
-    def ^(s, i=-1)
-      s = s.to_s.bytes
-      s = s.inject(''){|p, b| p+(b^self.bytes[(i+=1)%length]).chr}
-      s.extend Extensions
-      return s
+    def sha2(n=256)
+      digest(Digest::SHA2.new(n))
     end
-    def +(x)
-      x = super
-      x.extend Extensions
-      return x
-    end
-    def *(n)
-      e = self.bytes.inject(''){|e, byte| e<<byte.to_s(2)}
-      e = Entropia.novi(e, self, :b=>2)
-      e = e*n unless n==2
-      return e
-    end
-    def bits
-      Lb[self.entropy]
-    end
-    def shuffled?
-      self.shuffled==true
-    end
-  end
 
-  module Extended
-    def self.[](d, s)
-      d.extend Extensions
-      d.base = 256
-      d.randomness = s.randomness
-      d.shuffled = true
-      d.entropy = 256**d.length
-      d.entropy = s.entropy if s.entropy < d.entropy
-      d.randomness = d.bits if d.randomness > d.bits
-      d.digits = nil
-      return d
+    def sha1
+      digest(Digest::SHA1)
     end
-  end
 
-  module D
-    def self.[](s, d=DIGEST[:D])
-      d = d.digest(s.to_s)
-      return Extended[d, s]
+    def md5
+      digest(Digest::MD5)
     end
-  end
 
-  module C
-    def self.[](s, d=DIGEST[:C])
-      d = d.digest(s.to_s)
-      return Extended[d, s]
+    def rmd160
+      digest(Digest::RMD160)
     end
   end
 end

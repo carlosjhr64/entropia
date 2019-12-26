@@ -1,16 +1,15 @@
 # Standard Libraries
 require 'digest'
-require 'securerandom'
 
 # Gems
 require 'base_convert'
 
 # This Gem
 module ENTROPIA
-  VERSION = '0.1.191225'
+  VERSION = '0.1.191226'
 
-  require 'entropia/digest'
   require 'entropia/entropia'
+  require 'entropia/digest'
 end
 
 # Requires:
