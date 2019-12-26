@@ -130,7 +130,7 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 24.0,     e.bits
   end
 
-  def test_008_convert_base
+  def test_007_convert_base
     e = Entropia.new.increase!(32, random: Random)
     assert_equal 16, H
     eh = e*H
@@ -142,7 +142,7 @@ class TestEntropia < Test::Unit::TestCase
     assert e==eh
   end
 
-  def test_009_convert_base_conservation
+  def test_008_convert_base_conservation
     # Random.new(0) #radom_number(2) => 0,1,1,0,1,1,1,1
     e = E.new.p!(8, random: Random.new(0))
     # Remember that new entropia prepends the string...
@@ -160,7 +160,7 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 'F6', eh.to_s
   end
 
-  def test_010_concat_binary
+  def test_009_concat_binary
     e0 = E.new.p!(4, random: Random.new(0)) #=> '0110' as random
     assert_equal '0110', e0.to_s
     assert_equal 4.0, e0.randomness
@@ -186,7 +186,7 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal true, f.shuffled?
   end
 
-  def test_011_concat_mix
+  def test_010_concat_mix
     eb = E.new('0101010101010101')
     assert_equal 2, eb.base
     assert_equal 2**16, eb.entropy
@@ -319,5 +319,45 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal 62, w.base
     assert_equal value, w.to_i
     refute w==e
+  end
+
+  def test_014_xor
+    # 555^444 == 919
+    a = Entropia.new 555, base: 16
+    assert_equal '22B', a.to_s
+    b = Entropia.new 444, base: 16
+    assert_equal '1BC', b.to_s
+    c = a^b
+    assert_equal 919, c.to_i
+    assert_equal '397', c.to_s
+    x = c^b
+    assert x==a
+    refute x.equal? a
+
+    # say `a` is not random at all
+    a = Entropia.new rand(2**512).to_s(16), base: 16
+    assert_equal 0.0, a.randomness
+
+    # say `b` is entirely random
+    b = Entropia.new rand(2**16).to_s(8),   base: 8
+    b.set_shuffled true
+    b.set_randomness Lb[b.entropy]
+    assert_equal b.bits, b.randomness
+
+    # then properties of `a^b` are
+    c = a^b
+    assert_equal 16, c.base
+    assert_equal a.entropy, c.entropy
+    assert_equal b.randomness, c.randomness
+    assert_equal false, c.shuffled?
+
+    # and we can sort~of get `a` back!
+    x = b^c
+    assert_equal a.to_s, x.to_s
+    assert_equal a.to_i, x.to_i
+    # but...
+    # `b^c` "thinks" it's as random as b
+    assert_equal b.randomness, x.randomness
+    # Can this be fixed?  :-??
   end
 end

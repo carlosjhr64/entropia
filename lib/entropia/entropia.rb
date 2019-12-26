@@ -158,17 +158,17 @@ module ENTROPIA
       x,y = _x_(y)
       x,y = y,x  if x.entropy > y.entropy
 
-      s,l = '',xbits.length
       xbits = x.to_base(2, '01').to_s.chars.map{|_|_.ord - 48}
       ybits = y.to_base(2, '01').to_s.chars.map{|_|_.ord - 48}
+      s,l = '',xbits.length
       ybits.each_with_index do |ybit, i|
         s << (xbits[i%l] ^ ybit).to_s
       end
 
       Entropia.new(s,
                    base:       2,
-                   entropy:    [x.entropy, y.entropy].min,
-                   randomness: [x.randomness, y.randomness].min,
+                   entropy:    [x.entropy, y.entropy].max,
+                   randomness: [x.randomness, y.randomness].max,
                    shuffled:   (x.shuffled? and y.shuffled?),
                    digits:     '01'
                   ).to_base(x.base, x.digits)
