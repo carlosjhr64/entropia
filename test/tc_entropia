@@ -250,32 +250,74 @@ class TestEntropia < Test::Unit::TestCase
   end
 
   def test_012_equal
-   #s = Entropia.new.increase(16)
-   #sh = s*16
-   #so = s*8
-   #assert sh == so
-   #assert so == sh
+    # For this to work,
+    # entropy must be "congruent" among the different bases used...
+
+    # Can *NOT* use entropy 2**11 among bases 2, 8, and 16:
+    refute((_=Math.log(2**11, 16))==_.to_i)
+    refute((_=Math.log(2**11, 8))==_.to_i)
+
+    # Can use entropy 2**12 among bases 2, 8, and 16:
+    assert((_=Math.log(2**12, 16))==_.to_i)
+    assert((_=Math.log(2**12, 8))==_.to_i)
+
+    # Can *NOT* use 2**13 amont base 2, 8 and 16:
+    refute((_=Math.log(2**13, 16))==_.to_i)
+    refute((_=Math.log(2**13, 8))==_.to_i)
+
+    # Using entropy 2**12:
+    e = E.new 69, entropy: 2**12
+    assert_equal '000001000101', e.to_s
+    assert_equal 69, e.to_i
+    assert_equal 2**12, e.entropy
+
+    eo = e.to_base(8, 'abcdefgh')
+    assert_equal 69, eo.to_i
+    assert_equal 'abaf', eo.to_s
+    assert_equal 2**12, eo.entropy
+
+    eh = e.to_base(16, 'ABCDEFGHIJKLMNOP')
+    assert_equal 69, eh.to_i
+    assert_equal 'AEF', eh.to_s
+    assert_equal 2**12, eh.entropy
+
+    assert e == eh
+    assert e == eo
+    assert eh == eo
+    assert eo == eh
   end
 
   def test_013_notation
-   #s = E[256]
-   #assert_equal 256, s.length
+    e = E[256]{SecureRandom}
+    value = e.to_i
+    assert_equal 256, e.to_s.length
 
-   #h = s*H
-   #assert_equal 16, h.base
+    # Congruent base combo
+    assert((_=Math.log(2**256, 16))==_.to_i)
+    h = e*H
+    assert_equal 16, h.base
+    assert_equal value, h.to_i
+    assert h==e
 
-   #o = s*O
-   #assert_equal 8, o.base
+    # Non-Congruent base combo
+    refute((_=Math.log(2**256, 8))==_.to_i)
+    o = e*O
+    assert_equal 8, o.base
+    assert_equal value, o.to_i
+    refute o==e
 
-   #q = s*Q
-   #assert_equal 91, q.base
+    # Non-Congruent base combo
+    refute((_=Math.log(2**256, 91))==_.to_i)
+    q = e.to_base(Q, BaseConvert::Configuration::QGRAPH)
+    assert_equal 91, q.base
+    assert_equal value, q.to_i
+    refute q==e
 
-   #w = s*W
-   #assert_equal 62, w.base
-
-   #assert h == o
-   #assert q == o
-   #assert q == w
+    # Non-Congruent base combo
+    refute((_=Math.log(2**256, 62))==_.to_i)
+    w = e*W
+    assert_equal 62, w.base
+    assert_equal value, w.to_i
+    refute w==e
   end
-
 end
