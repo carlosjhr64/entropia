@@ -360,4 +360,15 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal b.randomness, x.randomness
     # Can this be fixed?  :-??
   end
+
+  def test_015_randomize
+    e = Entropia.new entropy: 2**80
+    assert_equal '00000000000000000000000000000000000000000000000000000000000000000000000000000000', e.to_s
+    e.randomize!
+    n = e.to_s.chars.count{|_|_=='1'}
+    assert n.between?(20,60), 'not likely to be out of bounds'
+    e = Entropia.new entropy: 2**16
+    e.randomize! random: Random.new(0)
+    assert_equal '0000101010101100', e.to_s
+  end
 end
