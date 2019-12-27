@@ -29,7 +29,7 @@ module ENTROPIA
       when false, true
         @shuffled = shuffled
       else
-        raise "shuffle must be either true or false"
+        raise "shuffled must be either true or false"
       end
     end
 
@@ -145,7 +145,7 @@ module ENTROPIA
                    digits:     d)
     end
 
-    # Entropia objects representing the same values should be equal eachother.
+    # Entropia objects representing state should equal eachother.
     def ==(e)
       @integer      == e.to_i       and
         @entropy    == e.entropy    and
@@ -156,6 +156,8 @@ module ENTROPIA
     # xor
     def ^(y)
       x,y = _x_(y)
+      # Think of the key(x) as that with the smaller entropy.
+      # The message(y) to be xor-encripted has the bigger entropy.
       x,y = y,x  if x.entropy > y.entropy
 
       xbits = x.to_base(2, '01').to_s.chars.map{|_|_.ord - 48}
