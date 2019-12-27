@@ -169,9 +169,9 @@ module ENTROPIA
 
       Entropia.new(s,
                    base:       2,
-                   entropy:    [x.entropy, y.entropy].max,
+                   entropy:    y.entropy, # y has the bigger entropy
                    randomness: [x.randomness, y.randomness].max,
-                   shuffled:   (x.shuffled? and y.shuffled?),
+                   shuffled:   y.shuffled?,
                    digits:     '01'
                   ).to_base(x.base, x.digits)
     end
