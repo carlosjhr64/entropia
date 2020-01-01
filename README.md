@@ -57,7 +57,7 @@ Keeps track of it's shuffled state.
 
 (The MIT License)
 
-Copyright (c) 2019 CarlosJHR64
+Copyright (c) 2020 CarlosJHR64
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

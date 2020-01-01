@@ -1,14 +1,14 @@
 Gem::Specification.new do |s|
 
   s.name     = 'entropia'
-  s.version  = '0.1.191226'
+  s.version  = '0.1.200101'
 
   s.homepage = 'https://github.com/carlosjhr64/entropia'
 
-  s.author   = 'CarlosJHR64'
+  s.author   = 'carlosjhr64'
   s.email    = 'carlosjhr64@gmail.com'
 
-  s.date     = '2019-12-26'
+  s.date     = '2020-01-01'
   s.licenses = ['MIT']
 
   s.description = <<DESCRIPTION
@@ -26,27 +26,16 @@ Creates random strings with different base alphabets and
 converts to and from.
 SUMMARY
 
-  s.extra_rdoc_files = ['README.rdoc']
-  s.rdoc_options     = ["--main", "README.rdoc"]
-
-  s.require_paths = ["lib"]
+  s.require_paths = ['lib']
   s.files = %w(
 ANALYSIS.txt
-History.txt
-README.rdoc
-TODO.txt
+README.md
 lib/entropia.rb
 lib/entropia/digest.rb
 lib/entropia/entropia.rb
-lib/entropia/lb.rb
-lib/entropia/version.rb
-test/test_digest.rb
-test/test_entropia.rb
-test/test_lb.rb
   )
 
-  s.add_runtime_dependency 'base_convert', '~> 0.0', '>= 0.0.1'
-  s.add_development_dependency 'test-unit', '~> 2.5', '>= 2.5.5'
-  s.requirements << 'ruby: ruby 2.1.0p0 (2013-12-25 revision 44422) [x86_64-linux]'
+  s.add_runtime_dependency 'base_convert', '~> 3.1', '>= 3.1.191231'
+  s.requirements << 'ruby: ruby 2.7.0p0 (2019-12-25 revision 647ee6f091) [x86_64-linux]'
 
 end

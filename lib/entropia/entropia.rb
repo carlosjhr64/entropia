@@ -155,25 +155,27 @@ module ENTROPIA
 
     # xor
     def ^(y)
-      x,y = _x_(y)
-      # Think of the key(x) as that with the smaller entropy.
-      # The message(y) to be xor-encripted has the bigger entropy.
+      x = self
       x,y = y,x  if x.entropy > y.entropy
 
-      xbits = x.to_base(2, '01').to_s.chars.map{|_|_.ord - 48}
-      ybits = y.to_base(2, '01').to_s.chars.map{|_|_.ord - 48}
-      s,l = '',xbits.length
-      ybits.each_with_index do |ybit, i|
-        s << (xbits[i%l] ^ ybit).to_s
+      k = x.to_i.to_s(2).bytes.reverse
+      l = x.bits.ceil
+      m = y.to_i.to_s(2).bytes.reverse
+      n = y.bits.ceil
+      c = ''
+      (0).upto(n-1) do |i|
+        a = k[i%l] || 48
+        b = m[i] || 48
+        c.prepend (a^b).to_s
       end
+      integer = c.to_i(2)
 
-      Entropia.new(s,
-                   base:       2,
+      Entropia.new(integer,
+                   base:       [x.base, y.base].max,
                    entropy:    y.entropy, # y has the bigger entropy
                    randomness: [x.randomness, y.randomness].max,
                    shuffled:   y.shuffled?,
-                   digits:     '01'
-                  ).to_base(x.base, x.digits)
+                   digits:     (x.digits.length < y.digits.length)? y.digits : x.digits)
     end
 
     def shuffled?
