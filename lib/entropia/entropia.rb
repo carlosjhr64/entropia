@@ -59,6 +59,18 @@ module ENTROPIA
       set_shuffled(shuffled)
     end
 
+    def inspect
+      digits_key = ''
+      [:g94, :q, :g, :w_, :b64, :u].each do |key|
+        if BaseConvert::DIGITS[key].start_with?(@digits)
+          digits_key = key
+          break
+        end
+      end
+      rpb = ((b=bits)>0.0)?  @randomness/b :  0.0
+      "#{@string} #{base}:#{digits_key} #{(100*rpb).round}%"
+    end
+
     def randomize!(random: Random)
       @integer = random.random_number(@entropy)
       @randomness = Lb[@entropy]

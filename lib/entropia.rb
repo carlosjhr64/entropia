@@ -6,7 +6,7 @@ require 'base_convert'
 
 # This Gem
 module ENTROPIA
-  VERSION = '0.1.200101'
+  VERSION = '0.1.200102'
 
   require 'entropia/entropia'
   require 'entropia/digest'
