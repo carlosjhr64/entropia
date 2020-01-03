@@ -1,14 +1,14 @@
 Gem::Specification.new do |s|
 
   s.name     = 'entropia'
-  s.version  = '0.1.200102'
+  s.version  = '0.1.200103'
 
   s.homepage = 'https://github.com/carlosjhr64/entropia'
 
   s.author   = 'carlosjhr64'
   s.email    = 'carlosjhr64@gmail.com'
 
-  s.date     = '2020-01-02'
+  s.date     = '2020-01-03'
   s.licenses = ['MIT']
 
   s.description = <<DESCRIPTION

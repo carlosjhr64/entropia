@@ -1,6 +1,11 @@
 module ENTROPIA
   Lb = lambda{|n| Math.log(n, 2)}
 
+  # For Entropia#inspect,
+  # keys I want to recognize in DIGITS
+  # in the order I want them recognized.
+  DIGITS_KEYS = [:g94, :q, :g, :w_, :b64, :u]
+
   class Entropia < BaseConvert::Number
     # Needs to be able to set the entropy capacity of the string
     # without changing its current "value".
@@ -61,14 +66,15 @@ module ENTROPIA
 
     def inspect
       digits_key = ''
-      [:g94, :q, :g, :w_, :b64, :u].each do |key|
-        if BaseConvert::DIGITS[key].start_with?(@digits)
+      DIGITS_KEYS.each do |key|
+        if DIGITS[key].start_with?(@digits)
           digits_key = key
           break
         end
       end
       rpb = ((b=bits)>0.0)?  @randomness/b :  0.0
-      "#{@string} #{base}:#{digits_key} #{(100*rpb).round}%"
+      precission = (rpb<0.1)? 1: 0
+      "#{@string} #{base}:#{digits_key} #{(100*rpb).round(precission)}%"
     end
 
     def randomize!(random: Random)
@@ -87,10 +93,11 @@ module ENTROPIA
     end
 
     # Increase the length of the string.
-    def increase!(n=1, random: nil)
-      if random
-        n.times{@string.prepend @digits[random.random_number(@base)]}
-        @randomness += n*Lb[@base]
+    def increment!(n=1, rng=nil, random: rng)
+      rng ||= random
+      if rng
+        n.times{@string.prepend @digits[rng.random_number(@base)]}
+        @randomness += n*Lb[@base]  if random
         @integer = toi
       else
         n.times{@string.prepend @digits[0]}
@@ -100,7 +107,6 @@ module ENTROPIA
       @entropy = @base ** @string.length
       self
     end
-    alias p! increase!
 
     # The method for base convert.
     def to_base(base, digits=@digits)
@@ -142,19 +148,27 @@ module ENTROPIA
     # before concatenation and then
     # create the new entropy object.
     def +(y)
-      x,y = _x_(y)
-      string = x.to_s + y.to_s
-      b = x.base # or y.base # same
-      e = x.entropy * y.entropy
-      r = x.randomness + y.randomness
-      f = x.shuffled? and y.shuffled?
-      d = x.digits # or y.digits # same
-      Entropia.new(string,
-                   base:       b,
-                   entropy:    e,
-                   randomness: r,
-                   shuffled:   f,
-                   digits:     d)
+      case y
+      when Entropia
+        x,y = _x_(y)
+        string = x.to_s + y.to_s
+        b = x.base # or y.base # same
+        e = x.entropy * y.entropy
+        r = x.randomness + y.randomness
+        f = x.shuffled? and y.shuffled?
+        d = x.digits # or y.digits # same
+        Entropia.new(string,
+                     base:       b,
+                     entropy:    e,
+                     randomness: r,
+                     shuffled:   f,
+                     digits:     d)
+      when Integer
+        raise "String increase request must be a non-negative Integer" if y < 0
+        self.increment!(y) # TODO: functional paradigm
+      else
+        raise "y must be Entropia|Integer"
+      end
     end
 
     # Entropia objects representing state should equal eachother.
@@ -208,23 +222,5 @@ module ENTROPIA
       s = s*@base unless @base==2
       return s
     end
-
-    # The mathematical notation should be as terse as possible.
-    # This will contruct a new entropy string.
-    def self.[](n)
-      if block_given?
-        Entropia.new.p!(n, random: yield)
-      else
-        Entropia.new.p!(n)
-      end
-    end
   end
-
-  # For concision
-  E = Entropia
-  O = 8
-  H = 16
-  W = 62
-  B = 64
-  Q = 91
 end
