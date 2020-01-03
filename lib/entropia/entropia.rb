@@ -209,18 +209,17 @@ module ENTROPIA
     end
 
     def shuffle(random: Random)
-      s = (@base==2)? self : self*2
-      # I think that with a good enough random number generator
-      # for the shuffle and truly random bits, this should suffice.
-      s = s.to_s.chars.shuffle(random: random).join
-      s = Entropia.new(s,
-                       base:       2,
-                       entropy:    @entropy,
-                       randomness: @randomness,
-                       shuffled:   true,
-                       digits:     @digits)
-      s = s*@base unless @base==2
-      return s
+      s = @integer.to_s(2)
+      while 2**s.length < @entropy
+        s.prepend '0'
+      end
+      s = s.chars.shuffle(random: random).join
+      Entropia.new(s.to_i(2),
+                   base:       @base,
+                   entropy:    @entropy,
+                   randomness: @randomness,
+                   shuffled:   true,
+                   digits:     @digits)
     end
   end
 end
