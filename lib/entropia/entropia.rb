@@ -210,9 +210,7 @@ module ENTROPIA
 
     def shuffle(random: Random)
       s = @integer.to_s(2)
-      while 2**s.length < @entropy
-        s.prepend '0'
-      end
+      (bits.ceil - s.length).times{s.prepend '0'}
       s = s.chars.shuffle(random: random).join
       Entropia.new(s.to_i(2),
                    base:       @base,
