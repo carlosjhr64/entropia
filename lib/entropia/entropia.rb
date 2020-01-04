@@ -77,7 +77,9 @@ module ENTROPIA
       end
       rpb = ((b=bits)>0.0)?  @randomness/b :  0.0
       precission = (rpb<0.1)? 1: 0
-      "#{@string} #{base}:#{digits_key} #{(100*rpb).round(precission)}%"
+      percent_random = (100*rpb).round(precission)
+      shuffled = (@shuffled)? '+' : '-'
+      "#{@string} #{base}:#{digits_key} #{percent_random}% #{shuffled}"
     end
 
     def randomize!(random: Random)
@@ -168,7 +170,13 @@ module ENTROPIA
                      digits:     d)
       when Integer
         raise "String increase request must be a non-negative Integer" if y < 0
-        self.increment!(y) # TODO: functional paradigm
+        Entropia.new(@integer,
+                     base:       @base,
+                     entropy:    @entropy,
+                     randomness: @randomness,
+                     shuffled:   @shuffled,
+                     digits:     @digits
+                    ).increment!(y)
       else
         raise "y must be Entropia|Integer"
       end
@@ -211,7 +219,7 @@ module ENTROPIA
       @shuffled
     end
 
-    def shuffle(random: Random)
+    def shuffle(rng=Random, random: rng)
       s = @integer.to_s(2)
       (bits.ceil - s.length).times{s.prepend '0'}
       s = s.chars.shuffle(random: random).join
