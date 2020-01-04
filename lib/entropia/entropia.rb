@@ -13,11 +13,14 @@ module ENTROPIA
       unless entropy.is_a?(Integer) and entropy >= 0
         raise "entropy request must be a non-negative Integer"
       end
-      # Sometimes we need to pad entropy back up.
-      zero = @digits[0]
-      while entropy > @base ** @string.length
-        @string.prepend zero
-        @shuffled &&= false
+      if entropy > 0
+        # Sometimes we need to pad entropy back up.
+        n = Math.log(entropy, @base).ceil - @string.length
+        if n > 0
+          @shuffled &&= false
+          zero = @digits[0]
+          n.times{@string.prepend zero}
+        end
       end
       @entropy = @base ** @string.length
     end
