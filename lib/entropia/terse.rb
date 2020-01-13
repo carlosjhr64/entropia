@@ -18,6 +18,9 @@ module ENTROPIA
 
   class E
     alias p! increment!
+    alias * to_base
+    alias + concat
+    alias ^ xor
     alias increase! increment! # for back compatibility
   end
 end

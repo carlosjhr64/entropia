@@ -1,28 +1,49 @@
 module ENTROPIA
   Lb = lambda{|n| Math.log(n, 2)}
 
-  # For Entropia#inspect,
-  # keys I want to recognize in DIGITS
-  # in the order I want them recognized.
-  DIGITS_KEYS = [:g94, :q, :g, :w_, :b64, :u]
-
   class Entropia < BaseConvert::Number
+    # Return self and y as an x,y pair with common base and digits.
+    def Entropia.xy(x,y)
+      unless x.base == y.base and  x.digits == y.digits
+        digits = (y.digits.length > x.digits.length)? y.digits : x.digits
+        base   = (y.base > x.base)?                   y.base   : x.base
+        x = x.to_base(base, digits)
+        y = y.to_base(base, digits)
+      end
+      return x,y
+    end
+
+    def Entropia.length(entropy, base)
+      n,e = 0,1
+      while e < entropy
+        n += 1
+        e *= base
+      end
+      return n
+    end
+
+    def length
+      Entropia.length(@entropy, @base)
+    end
+
     # Needs to be able to set the entropy capacity of the string
-    # without changing its current "value".
-    def set_entropy(entropy)
-      unless entropy.is_a?(Integer) and entropy >= 0
-        raise "entropy request must be a non-negative Integer"
+    # without changing its current Integer value.
+    # Will only set increased entropy.
+    def set_entropy(entropy, number=nil)
+      unless entropy.is_a?(Integer) and entropy > 0
+        raise "entropy request must be a positive Integer"
       end
-      if entropy > 0
-        # Sometimes we need to pad entropy back up.
-        n = Math.log(entropy, @base).ceil - @string.length
-        if n > 0
-          @shuffled &&= false
-          zero = @digits[0]
-          n.times{@string.prepend zero}
-        end
+      @shuffled = false  if @shuffled and entropy  > @entropy
+      if number.is_a?(String) and (e=@base**number.length) > entropy
+        entropy = e
+      elsif @integer and (e=[@integer,@base].max) > entropy # the minimum entropy is @base
+        entropy = e
       end
-      @entropy = @base ** @string.length
+      # entropy = @base ** @string.length
+      # entropy = @base ** '0'.length #=> @base
+      # entropy = @base ** ''.length #=> 1
+      entropy = @base ** Entropia.length(entropy, @base)
+      @entropy = entropy if entropy > @entropy
     end
 
     def set_randomness(randomness)
@@ -42,12 +63,11 @@ module ENTROPIA
     end
 
     # This is the set_entropy version in bits.
-    def set_bits(bits)
-      unless bits.is_a?(Integer) and bits >= 0
+    def set_bits(b)
+      unless b.is_a?(Integer) and b >= 0
         raise "bits request must be a non-negative Integer"
       end
-      set_entropy(2**bits)
-      bits
+      set_entropy(2**b) and bits
     end
 
     # Needs to keep track of
@@ -57,37 +77,35 @@ module ENTROPIA
     attr_reader :randomness, :entropy
     def initialize(number = '',
                    base: 2,
-                   entropy: 0,
+                   entropy: 1,
                    randomness: 0.0,
                    shuffled: false,
                    digits: nil)
       super(number, base: base, digits: digits)
-      set_entropy(entropy)
+      @entropy, @randomness, @shuffled = 1, 0.0, false # init but to be overridden below
+      set_entropy(entropy, number)
       set_randomness(randomness)
       set_shuffled(shuffled)
     end
 
+    def to_s
+      string = tos
+      (length - string.length).times{string.prepend @digits[0]}
+      string
+    end
+
     def inspect
-      digits_key = ''
-      DIGITS_KEYS.each do |key|
-        if DIGITS[key].start_with?(@digits)
-          digits_key = key
-          break
-        end
-      end
       rpb = ((b=bits)>0.0)?  @randomness/b :  0.0
       precission = (rpb<0.1)? 1: 0
       percent_random = (100*rpb).round(precission)
       shuffled = (@shuffled)? '+' : '-'
-      "#{@string} #{base}:#{digits_key} #{percent_random}% #{shuffled}"
+      "#{super} #{percent_random}% #{shuffled}"
     end
 
     def randomize!(random: Random)
       @integer = random.random_number(@entropy)
       @randomness = Lb[@entropy]
       @shuffled = false
-      @string = tob
-      set_entropy(@entropy)
       self
     end
 
@@ -99,17 +117,18 @@ module ENTROPIA
 
     # Increase the length of the string.
     def increment!(n=1, rng=nil, random: rng)
+      raise "increment value must be a positive Integer" unless n.is_a?(Integer) and n > 0
       rng ||= random
       if rng
-        n.times{@string.prepend @digits[rng.random_number(@base)]}
+        string = to_s
+        n.times{string.prepend @digits[rng.random_number(@base)]}
         @randomness += n*Lb[@base]  if random
-        @integer = toi
+        @integer = toi(string)
       else
-        n.times{@string.prepend @digits[0]}
-        @shuffled = false
+        @shuffled &&= false
       end
       # Revaluate entropy as a whole.
-      @entropy = @base ** @string.length
+      @entropy = @base ** (n + length)
       self
     end
 
@@ -133,53 +152,28 @@ module ENTROPIA
                    digits:     digits)
     end
 
-    def *(n)
-      to_base(n)
-    end
-
-    # Return self and y as an x,y pair with common base and digits.
-    def _x_(y)
-      x = self
-      unless x.base == y.base and  x.digits == y.digits
-        digits = (y.digits.length > x.digits.length)? y.digits : x.digits
-        base   = (y.base > x.base)?                   y.base   : x.base
-        x = x.to_base(base, digits)
-        y = y.to_base(base, digits)
-      end
-      return x,y
-    end
-
     # We need to convert to a common base and digits
     # before concatenation and then
     # create the new entropy object.
-    def +(y)
-      case y
-      when Entropia
-        x,y = _x_(y)
+    def concat(*entropies)
+      x = self
+      entropies.each do |y|
+        raise "concat items must be Entropia" unless y.is_a? Entropia
+        x,y = Entropia.xy(x,y)
         string = x.to_s + y.to_s
         b = x.base # or y.base # same
         e = x.entropy * y.entropy
         r = x.randomness + y.randomness
         f = x.shuffled? and y.shuffled?
         d = x.digits # or y.digits # same
-        Entropia.new(string,
-                     base:       b,
-                     entropy:    e,
-                     randomness: r,
-                     shuffled:   f,
-                     digits:     d)
-      when Integer
-        raise "String increase request must be a non-negative Integer" if y < 0
-        Entropia.new(@integer,
-                     base:       @base,
-                     entropy:    @entropy,
-                     randomness: @randomness,
-                     shuffled:   @shuffled,
-                     digits:     @digits
-                    ).increment!(y)
-      else
-        raise "y must be Entropia|Integer"
+        x = Entropia.new(string,
+                         base:       b,
+                         entropy:    e,
+                         randomness: r,
+                         shuffled:   f,
+                         digits:     d)
       end
+      return x
     end
 
     # Entropia objects representing state should equal eachother.
@@ -190,22 +184,50 @@ module ENTROPIA
         @shuffled   == e.shuffled?
     end
 
-    # xor
-    def ^(y)
+    def shuffled?
+      @shuffled
+    end
+
+    def binary
+      string = @integer.to_s(2)
+      (Entropia.length(@entropy, 2) - string.length).times{string.prepend '0'}
+      return string
+    end
+
+    def shuffle(rng=Random, random: rng)
+      Entropia.new(binary.chars.shuffle(random: random).join.to_i(2),
+                   base:       @base,
+                   entropy:    @entropy,
+                   randomness: @randomness,
+                   shuffled:   true,
+                   digits:     @digits)
+    end
+
+    def each_bit
+      integer = @integer
+      Entropia.length(@entropy, 2).times do
+        integer,i = integer.divmod(2)
+        yield i
+      end
+    end
+
+    def xor(y)
       x = self
       x,y = y,x  if x.entropy > y.entropy
 
-      k = x.to_i.to_s(2).bytes.reverse
-      l = x.bits.ceil
-      m = y.to_i.to_s(2).bytes.reverse
-      n = y.bits.ceil
-      c = ''
-      (0).upto(n-1) do |i|
-        a = k[i%l] || 48
-        b = m[i] || 48
-        c.prepend (a^b).to_s
+      j = Fiber.new do
+        while true # just keep giving the next key bit
+          y.each_bit do |bit|
+            Fiber.yield bit
+          end
+        end
       end
-      integer = c.to_i(2)
+
+      d,integer = 1,0 
+      x.each_bit do |i|
+        integer += d if (i^j.resume)>0
+        d*=2
+      end
 
       Entropia.new(integer,
                    base:       [x.base, y.base].max,
@@ -213,22 +235,6 @@ module ENTROPIA
                    randomness: [x.randomness, y.randomness].max,
                    shuffled:   y.shuffled?,
                    digits:     (x.digits.length < y.digits.length)? y.digits : x.digits)
-    end
-
-    def shuffled?
-      @shuffled
-    end
-
-    def shuffle(rng=Random, random: rng)
-      s = @integer.to_s(2)
-      (bits.ceil - s.length).times{s.prepend '0'}
-      s = s.chars.shuffle(random: random).join
-      Entropia.new(s.to_i(2),
-                   base:       @base,
-                   entropy:    @entropy,
-                   randomness: @randomness,
-                   shuffled:   true,
-                   digits:     @digits)
     end
   end
 end
