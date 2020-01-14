@@ -1,7 +1,7 @@
 module ENTROPIA
   class Entropia
     def digest(d=Digest::SHA2.new(256), r=256.0)
-      Entropia.new(d.hexdigest @string,
+      Entropia.new(d.hexdigest(to_s),
                    base: 16,
                    # entropy becomes that in string
                    randomness: [r, @randomness].min,
