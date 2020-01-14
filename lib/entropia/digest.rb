@@ -1,6 +1,6 @@
 module ENTROPIA
   class Entropia
-    def digest(d=Digest::SHA2.new(256), r=256)
+    def digest(d=Digest::SHA2.new(256), r=256.0)
       Entropia.new(d.hexdigest @string,
                    base: 16,
                    # entropy becomes that in string
@@ -11,7 +11,7 @@ module ENTROPIA
     end
 
     def sha2(n=256)
-      digest(Digest::SHA2.new(n, n.to_f))
+      digest(Digest::SHA2.new(n), n.to_f)
     end
 
     def sha1

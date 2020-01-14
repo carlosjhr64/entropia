@@ -33,7 +33,7 @@ module ENTROPIA
       unless entropy.is_a?(Integer) and entropy > 0
         raise "entropy request must be a positive Integer"
       end
-      @shuffled = false  if @shuffled and entropy  > @entropy
+      @shuffled = false  if @shuffled and entropy > @entropy
       if number.is_a?(String) and (e=@base**number.length) > entropy
         entropy = e
       elsif @integer and (e=[@integer,@base].max) > entropy # the minimum entropy is @base
@@ -43,7 +43,7 @@ module ENTROPIA
       # entropy = @base ** '0'.length #=> @base
       # entropy = @base ** ''.length #=> 1
       entropy = @base ** Entropia.length(entropy, @base)
-      @entropy = entropy if entropy > @entropy
+      @entropy = entropy  if entropy > @entropy
     end
 
     def set_randomness(randomness)
@@ -117,7 +117,7 @@ module ENTROPIA
 
     # Increase the length of the string.
     def increment!(n=1, rng=nil, random: rng)
-      raise "increment value must be a positive Integer" unless n.is_a?(Integer) and n > 0
+      raise "increment value must be a positive Integer"  unless n.is_a?(Integer) and n > 0
       rng ||= random
       if rng
         string = to_s
@@ -176,7 +176,7 @@ module ENTROPIA
       return x
     end
 
-    # Entropia objects representing state should equal eachother.
+    # Entropia objects representing the same entropies should equal eachother.
     def ==(e)
       @integer      == e.to_i       and
         @entropy    == e.entropy    and
