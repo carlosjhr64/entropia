@@ -126,6 +126,7 @@ module ENTROPIA
         @integer = toi(string)
       else
         @shuffled &&= false
+        @integer ||= 0
       end
       # Revaluate entropy as a whole.
       @entropy = @base ** (n + length)
