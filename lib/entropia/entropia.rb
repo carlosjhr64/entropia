@@ -212,30 +212,31 @@ module ENTROPIA
       end
     end
 
-    def xor(y)
-      x = self
-      x,y = y,x  if x.entropy > y.entropy
+    def xor(message)
+      key = self
+      # Want the lesser entropy to act as key.
+      key,message = message,key  if key.entropy > message.entropy
 
       j = Fiber.new do
         while true # just keep giving the next key bit
-          y.each_bit do |bit|
+          key.each_bit do |bit|
             Fiber.yield bit
           end
         end
       end
 
       d,integer = 1,0 
-      x.each_bit do |i|
+      message.each_bit do |i|
         integer += d if (i^j.resume)>0
         d*=2
       end
 
       Entropia.new(integer,
-                   base:       [x.base, y.base].max,
-                   entropy:    y.entropy, # y has the bigger entropy
-                   randomness: [x.randomness, y.randomness].max,
-                   shuffled:   y.shuffled?,
-                   digits:     (x.digits.length < y.digits.length)? y.digits : x.digits)
+                   base:       [key.base, message.base].max,
+                   entropy:    message.entropy, # the bigger entropy
+                   randomness: [key.randomness, message.randomness].max,
+                   shuffled:   message.shuffled?,
+                   digits:     (key.digits.length < message.digits.length)? message.digits : key.digits)
     end
   end
 end

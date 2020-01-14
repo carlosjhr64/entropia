@@ -16,43 +16,49 @@ Keeps track of it's shuffled state.
 
 ## SYNOPSIS:
 
-    > irb -I ./lib 
-    Welcome to IRB...
-    >> require 'entropia' #=> true
-    >> include ENTROPIA #=> Object
-    >> e0 = E[8] #=> "10000101"
-    >> e0.randomness #=> 0.0
-    >> e0.entropy #=> 256
-    >> e1 = E.new.pp(8,true){|n|rand(n)} #=> "11001101"
-    >> e1.randomness #=> 8.0
-    >> e1.entropy #=> 256
-    >> e = e0+e1 #=> "1000010111001101"
-    >> e.randomness #=> 8.0
-    >> e.entropy #=> 65536
-    >> e.shuffled? #=> false
-    >> f = e.shuffle #=> "1011101110010000"
-    >> f.shuffled? #=> true
-    >> f.randomness #=> 8.0
-    >> f.entropy #=> 65536
-    >> H #=> 16
-    >> fh = f*H #=> "BB90"
-    >> Q #=> 91
-    >> fq = f*Q #=> "(l^"
-    >> W #=> 62
-    >> fw = f*W #=> "CUS"
-    >> # SHA512 digest...
-    >   dfq = D[fq]
-    => "\xE9z\e\xCC\x8F\... ...\xB4\xC0\xB6\xB5\xAC\xE4d"
-    >> dfq.randomness #=> 8.0
-    >> dfq.bits #=> 16.0
-    >> dfq.length #=> 64
-    >> dfq.entropy #=> 65536
-    >> dfq*H
-    => "3A7D6F323F36B7345973F6... ...5A665A605B5AD67264"
+    $ irb -I ./lib 
+    # Welcome to IRB...
+    require 'entropia'
+    include ENTROPIA
+
+    e = Entropia.new '00000000', base: 2
+    e #=> 00000000 2:P95 0.0% -
+    e.inspect #=> "00000000 2:P95 0.0% -"
+    e.to_i #=> 0
+    e.to_s #=> "00000000"
+    e.length #=> 8
+    e.entropy #=> 256
+    e.bits #=> 8.0
+    e.binary #=> "00000000"
+
+    e.shuffled? #=> false
+    e.randomness #=> 0.0
+
+    e.randomize!(random: Random.new(0)) #=> 10101100 2:P95 100% -
+    e.randomness #=> 8.0
+
+    f = e.shuffle(random: Random.new(1))
+    f #=> 01001101 2:P95 100% +
+    # The '+' sign on the inspect above marks the "true" shuffle state.
+    f.shuffled? #=> true
+
+    g = f.to_base 16
+    g #=> 4D 16:P95 100% +
+
+    dg = g.sha2
+    dg #=> 19DE495E14C9E7A2623EEEF6D2B7D84D0A14D4C202B34BEA0F29EA4650F4E137 16:P95 3.1% +
+    dg.bits #=> 256.0
+    dg.randomness #=> 8.0
+    # The 3.1% above on the inspect is the percent random value:
+    dg.randomness / dg.bits #=> 0.03125
+
+    key = Entropia.new 'Where does it rain?', base: 95
+    code = Entropia.new 'Z*~RUwN=MuHCh ^*Nl#6FVNi7YsQ5xw<(gp', base: 95
+    (key^code).to_s #=> "The rain rains mainly in the plain."
 
 ## INSTALL:
 
-    > gem install entropia
+    $ gem install entropia
 
 ## LICENSE:
 
