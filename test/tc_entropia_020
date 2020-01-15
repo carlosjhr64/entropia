@@ -1,0 +1,29 @@
+#! ruby
+require 'test/unit'
+require 'entropia'
+
+# tc_entropia_001 contain the updated tests of version 0.0.
+# Additional tests motivated by version 0.1 are here.
+class TestEntropia < Test::Unit::TestCase
+  include ENTROPIA
+
+  def test_020_each_bit
+    n = 64**32
+    e = Entropia.new rand(n), entropy: n, base: 64, digits: :base64
+    s = ''
+    e.each_bit{|b|s.prepend b.to_s}
+    assert_equal s, e.binary
+    assert_equal e.to_i, s.to_i(2)
+  end
+
+  def test_021_each_byte
+    # "ABC" can be just a number(in ASCII base 256)!
+    b = 256
+    i = b**2*'A'.ord + b*'B'.ord + 'C'.ord
+    e = Entropia.new i
+    assert_equal '10000010100001001000011 2:P95 0.0% -', e.inspect
+    s = ''
+    e.each_byte{|c|s.prepend c.chr}
+    assert_equal 'ABC', s
+  end
+end

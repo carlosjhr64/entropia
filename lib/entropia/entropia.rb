@@ -205,12 +205,20 @@ module ENTROPIA
                    digits:     @digits)
     end
 
-    def each_bit
+    def each_divmod(n)
       integer = @integer
-      Entropia.length(@entropy, 2).times do
-        integer,i = integer.divmod(2)
+      Entropia.length(@entropy, n).times do
+        integer,i = integer.divmod(n)
         yield i
       end
+    end
+
+    def each_bit(&block)
+      each_divmod(2, &block)
+    end
+
+    def each_byte(&block)
+      each_divmod(256, &block)
     end
 
     def xor(message)
