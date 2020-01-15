@@ -228,21 +228,22 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal false, eh.shuffled?
 
     eq = E.new(digits: :q).p!(11)
-    assert_equal 2, eq.base
-    assert_equal 2**11, eq.entropy
+    assert_equal 91, eq.base
+    assert_equal 91**11, eq.entropy
+    assert_equal 11, eq.length
     assert_equal 11, eq.to_s.length
     assert_equal BaseConvert::DIGITS[:Q91], eq.digits
 
     assert_equal 0.0, eq.randomness
     assert_equal false, eq.shuffled?
     e = (eq.concat(eh)).shuffle
-    assert_equal 16, e.base
+    assert_equal 91, e.base
     assert_equal BaseConvert::DIGITS[:P95], e.digits
     assert e.shuffled?
-    length = Math.log(16**7 * 2**11, 16).ceil
-    assert length == 10 # length is 10
+    length = Math.log(16**7 * 91**11, 91).ceil
+    assert length == 16 # length is 10
     assert_equal length, e.to_s.length
-    assert_equal 16**length, e.entropy
+    assert_equal 91**length, e.entropy
 
     assert_equal 28.0, e.randomness
     assert_equal true, e.shuffled?

@@ -76,11 +76,12 @@ module ENTROPIA
     # Interpret entropy as a request for a bigger string if string is too short.
     attr_reader :randomness, :entropy
     def initialize(number = '',
-                   base: 2,
+                   base: nil,
                    entropy: 1,
                    randomness: 0.0,
                    shuffled: false,
                    digits: nil)
+      base = 2  if number.is_a?(Integer) and base.nil? and digits.nil?
       super(number, base: base, digits: digits)
       @entropy, @randomness, @shuffled = 1, 0.0, false # init but to be overridden below
       set_entropy(entropy, number)
