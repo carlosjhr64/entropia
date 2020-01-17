@@ -2,7 +2,7 @@
 require 'test/unit'
 require 'entropia'
 
-# tc_entropia_001 contain the updated tests of version 0.0.
+# tc_entropia_001 contains the updated tests of version 0.0.
 # Additional tests motivated by version 0.1 are here.
 class TestEntropia < Test::Unit::TestCase
   include ENTROPIA
@@ -25,5 +25,13 @@ class TestEntropia < Test::Unit::TestCase
     s = ''
     e.each_byte{|c|s.prepend c.chr}
     assert_equal 'ABC', s
+  end
+
+  def test_022_commenrurable
+    assert E.commensurable? 2**256, 16
+    refute E.commensurable? 2**256, 64
+    e = E[256]
+    assert e.commensurable? 16
+    refute e.commensurable? 64
   end
 end

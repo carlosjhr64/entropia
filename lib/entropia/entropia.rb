@@ -13,17 +13,33 @@ module ENTROPIA
       return x,y
     end
 
-    def Entropia.length(entropy, base)
+    def Entropia._n_e(entropy, base)
       n,e = 0,1
       while e < entropy
         n += 1
         e *= base
       end
+      return n, e
+    end
+
+    def Entropia.length(entropy, base)
+      n,_ = Entropia._n_e(entropy, base)
       return n
     end
 
+    def Entropia.commensurable?(entropy, base)
+      _,e = Entropia._n_e(entropy, base)
+      return e == entropy
+    end
+
     def length
-      Entropia.length(@entropy, @base)
+      n,_ = Entropia._n_e(@entropy, @base)
+      return n
+    end
+
+    def commensurable?(base)
+      _,e = Entropia._n_e(@entropy, base)
+      return e == @entropy
     end
 
     # Needs to be able to set the entropy capacity of the string
