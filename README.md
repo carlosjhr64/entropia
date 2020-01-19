@@ -1,6 +1,6 @@
 # entropia
 
-* [VERSION 0.1.200117](https://github.com/carlosjhr64/entropia/releases)
+* [VERSION 0.1.200119](https://github.com/carlosjhr64/entropia/releases)
 * [github](https://www.github.com/carlosjhr64/entropia)
 * [rubygems](https://rubygems.org/gems/entropia)
 

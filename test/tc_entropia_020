@@ -34,4 +34,17 @@ class TestEntropia < Test::Unit::TestCase
     assert e.commensurable? 16
     refute e.commensurable? 64
   end
+
+  def test_023_terse_instantiation
+    assert_equal '0000 2:P95 0.0% -', E[4].inspect
+    assert_equal '0010 2:P95 0.0% -', E[4]{'10'}.inspect
+    assert_equal '0010 2:P95 0.0% -', E[4]{2}.inspect
+    assert_equal 'A 16:P95 0.0% -', E[4]{'A'}.inspect
+    e = E[5]{'A'} # one more bit request in base 16 expands to four more...
+    assert_equal '0A 16:P95 0.0% -', e.inspect
+    assert_equal 8.0, e.bits
+    rng = Random.new(0)
+    assert_equal '1100 2:P95 100% -', E[4]{rng}.inspect
+    assert_equal '1111 2:P95 100% -', E[4]{rng}.inspect
+  end
 end
