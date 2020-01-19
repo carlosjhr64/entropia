@@ -513,7 +513,7 @@ Nicely, base conversion distributes:
     ((a + b)*8).to_s == (a*8 + b*8).to_s #=> true
 
 This of course will all be very useful someday, but
-for now I just the above very interesting.  :P
+for now I just find the above very interesting.  :P
 
     'stop' #=> now
 
