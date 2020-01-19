@@ -489,7 +489,7 @@ And I can add these entropies. Entropia does reasonable things automatically:
 
 ## Properties of Entropia's operators
 
-With commensrurability issues aside,
+With commensurability issues aside,
 I'll illustrate some properties concat and base conversions have.
 
     a = E[60]{RNG}*64 #=> FHtI2K?p?1
