@@ -312,7 +312,7 @@ Entropia makes conversion to other bases easy with the `*` operator:
 
 Hexadecimal is commensurable with 256 bits:
     
-    2**256 == 16**64
+    2**256 == 16**64 #=> true
 
 While the string reprectation of `eh` differs from `e`,
 `eh` and `e` reprepreset the same entropy:
@@ -456,7 +456,66 @@ With entropy `2**264`, yes!:
     e2  == e64  #=> true
     e16 == e64  #=> true
 
-     'stop' #=> now
+## 60 bits
+
+For fun, I'd like to find the lowest entropy that can be neatly be expressed
+in base 2, 4, 8, 16, 32, and 64.
+I run out of graph characters at base 94, so
+base 128 and above require thought on new symbols,
+so I'll stop at base 64:
+
+    length64 = (1..100).detect{|l| e=64**l; [32,16,8,4,2].all?{|b| Math.log(e,b)%1==0}} #=> 10
+    entropy = 64**length64
+    bits = Lb[entropy] #=> 60.0
+
+With a 60 bits entropy, there's no problem expressing it in bases powers of twos up to 64(`2**6`):
+
+    e2 = E[60]{RNG}
+    e4 = e2*4    #=> 321013032320322320132312012213
+    e8 = e2*8    #=> 71071670727036660647
+    e16 = e2*16  #=> E473B8EB87B61A7
+    e32 = e2*32  #=> SHPRHQS7MOD7
+    e64 = e2*64  #=> v7EuwuUs6d
+    [e4,e8,e16,e64].all?{|e| e == e2} #=> true
+
+And I can add these entropies. Entropia does reasonable things automatically:
+
+    e = e2+e4+e8+e16+e32+e64
+    e.base #=> 64
+    # should have 360(60*6) bits, right?
+    e.bits #=> 360.0
+    e
+    #=> v7EuwuUs6dv7EuwuUs6dv7EuwuUs6dv7EuwuUs6dv7EuwuUs6dv7EuwuUs6d
+
+## Properties of Entropia's operators
+
+With commensrurability issues aside,
+I'll illustrate some properties concat and base conversions have.
+
+    a = E[60]{RNG}*64 #=> FHtI2K?p?1
+    b = E[60]{RNG}*64 #=> IopGc9aKgv
+
+Obviously, the concat operator does not commute, but
+some properties do preserve:
+
+    a+b  #=> FHtI2K?p?1IopGc9aKgv
+    b+a  #=> IopGc9aKgvFHtI2K?p?1
+    a+b == b+a                           #=> false
+    (a+b).to_s == (b+a).to_s             #=> false
+    (a+b).to_i == (b+a).to_i             #=> false
+    (a+b).bits == (b+a).bits             #=> true
+    (a+b).entropy == (b+a).entropy       #=> true
+    (a+b).randomness == (b+a).randomness #=> true
+
+Nicely, base conversion distributes:
+
+    (a + b)*8 == a*8 + b*8 #=> true
+    ((a + b)*8).to_s == (a*8 + b*8).to_s #=> true
+
+This of course will all be very useful someday, but
+for now I just the above very interesting.  :P
+
+    'stop' #=> now
 
 This does not look exactly like the arithmetic `*`, but
 it'll make more sense later.
