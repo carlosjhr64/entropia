@@ -58,7 +58,7 @@ The Entropia gem subclasses the
 ## Bits
 
 A bit of information is knowlege of something that could be found in one of two ways...
-true or false...  "1" or "O". 
+true or false...  "1" or "0".
 For 4 bits of entropy I write:
 
     e = E[4]
@@ -110,7 +110,7 @@ By default, `E[n]` gives the zero valued binary String of length `n`:
 I can get at random four bits:
 
     e = E[4]{RNG}
-    e            #=> 1111
+    e            #=> 0011
     e.entropy    #=> 16
     e.bits       #=> 4.0
     e.randomness #=> 4.0
@@ -125,8 +125,8 @@ while the four bits in `b` are not known...
 I can concat the Strings:
 
     a = E[4]      #=> 0000
-    b = E[4]{RNG} #=> 0111
-    c = a+b       #=> 00000111
+    b = E[4]{RNG} #=> 1011
+    c = a+b       #=> 00001011
     c.length      #=> 8
     c.entropy     #=> 256
     c.bits        #=> 8.0
@@ -236,27 +236,27 @@ We can get a sense of how long a 170 bit password is:
 What these password might look like:
 
     # Planck time computer impossible to crack
-    e256 = E[256].randomize!(random: RNG).to_base 94, :graph
+    e256 = E[256]{RNG}.to_base 94, :graph
     e256.length #=> 40
     e256.to_s
-    #=> !V3OK[8VSfGIi('&@1*</x9bwiT%8Q'\1M*<SnDT
+    #=> !c7ZF:]yhy1I`j&+Wq-R`p)KZZuw1>3mmU/o_h"N
 
     # Planck time computer cracked over cosmological time
-    e202 = E[202].randomize!(random: RNG).to_base 94, :graph
+    e202 = E[202]{RNG}.to_base 94, :graph
     e202.length #=> 31
     e202.to_s
-    #=> 4U;k(o&pDG>y0R^<xcO@5x&c0I9c_q>
+    #=> #mT?<tf<Cg&x1lti(C8vPNUb3ydHD"%
 
     # Planck time computer cracked in within 2 years
-    e170 = E[170].randomize!(random: RNG).to_base 94, :graph
+    e170 = E[170]{RNG}.to_base 94, :graph
     e170.length #=> 26
     e170.to_s
-    #=> ErMNa\*/*rOX~L<MI_ObW#x1_(
+    #=> FqhfVnXSBJal7:[7_*R?T\u4xX
 
 All three of these passwords are somewhat easily typed on a single line, but
 go from just impossible to crack to maybe cracked in a year.
 
-Now, no real digital computer will ever be as fast as this "planck time" computer.
+Now, no real digital computer will ever be as fast as this "Planck time" computer.
 What can a real computer do?
 A quick google search(year today 2020) gave me about [320 billion passwords per second](
 https://arstechnica.com/information-technology/2012/12/25-gpu-cluster-cracks-every-standard-windows-password-in-6-hours/).
@@ -285,7 +285,7 @@ A graph password of length 16 might look like this:
 
     graph = Entropia.new RNG.random_number(94**16), base: 94, digits: :graph
     graph.length #=> 16
-    graph        #=> ~0[S.p_3tni]CQ8}
+    graph        #=> &#Ab@>I=?dLK?H}6
 
 ## 256 bits
 
@@ -307,7 +307,7 @@ Entropia makes conversion to other bases easy with the `*` operator:
 
     H #=> 16
     eh = e*H
-    #=> 791A8FB19EE3D2C79C506329120A8AA9A5D1E984DEFA82C4B26FD2C60ACBD7D3
+    #=> A5EE9794052D08735E4513D0D52692F3F5081EC5C73547FE23EE074FDEB91DAF
     eh.length #=> 64
 
 Hexadecimal is commensurable with 256 bits:
@@ -339,19 +339,21 @@ Just to show that this is reversible:
     # and represent the same entropy:
     e2 == e #=> true
 
+## Commensurability
+
 Now, 256 bits is not commensarable with base 64:
 
     Math.log(2**256, 64) #=> 42.66666666666667
     E.length(2**256, 64) #=> 43
     2**256 == 64**43     #=> false
 
-I can get the Integer representation in base 32, but
+I can get the Integer representation in base 64, but
 it will not be the same entropy:
 
     # Can use e or eh for this
     (e*64) == (eh*64)       #=> true
     e64 = e*64
-    e64 #=> 7aQZx6UuzB7d51ZAH8AYgcbqUc4tlg2nB9lqiOAozVJ 64:P95 99% -
+    e64 #=> ANkbvG5BGXpNaKJqDKcalFr21x5npL7?YFk1q?UkHsl 64:P95 99% -
     e64.to_i == e.to_i      #=> true
     e64 == e                #=> false
     e64.entropy > e.entropy #=> true
@@ -360,12 +362,99 @@ To illustrate what's going on, I'll convert e64 back to base 16 and
 show its string... it'll have a leading zero:
 
     e64*16
-    #=> 0791A8FB19EE3D2C79C506329120A8AA9A5D1E984DEFA82C4B26FD2C60ACBD7D3
+    #=> 0A5EE9794052D08735E4513D0D52692F3F5081EC5C73547FE23EE074FDEB91DAF
     # compare to
     eh
-    #=> 791A8FB19EE3D2C79C506329120A8AA9A5D1E984DEFA82C4B26FD2C60ACBD7D3
+    #=> A5EE9794052D08735E4513D0D52692F3F5081EC5C73547FE23EE074FDEB91DAF
 
-## Commensurability
+Entropia provides a method to test for commensurability:
+
+    E.commensurable? 2**256, 2  #=> true
+    E.commensurable? 2**256, 16 #=> true
+    E.commensurable? 2**256, 64 #=> false
+
+    eh
+    #=> A5EE9794052D08735E4513D0D52692F3F5081EC5C73547FE23EE074FDEB91DAF 16:P95 100% -
+    eh.commensurable? 64 #=> false
+
+So now that we understand how base and length relate to the entropy of a string,
+I can show why base 2 and base 3 can never mix:
+
+    # In general: entropy = base**length
+    # Just test m and n upto 10...
+    a = [1,2,3,4,5,6,7,8,9,10]
+    a.product(a).any?{|n,m| 2**n == 3**m} #=> false
+
+As 2 and 3 are primes, any powers of 2 and 3 can not equal eachother.
+
+So what entropies are commesurable in base 16 and base 64?
+I will show that for any positive Integer `i>0`,
+entropies `16**n` and `65**m` will work when `m=2*i` and `n=3*i`.
+To get irb to follow along,
+I will set `i`, `m` and `n` to a numerically correct solution, but
+from there on it's a properly abtracted proof:
+
+    # These values are deduced below and
+    # used by irb to computationally verify the statements
+    # for the particular case i=1.
+    i = 1
+    m = 2*i
+    n = 3*i
+
+    # These equivalences are used in the proof below.
+    16**n == 64**m #=> true
+    2**4  == 16    #=> true
+    2**6  == 64    #=> true
+
+    # OK, looking for entropies
+    # that will fit both in base 16 and 64!
+    16**n == 64**m           #=> true
+    Lb[16**n]  == Lb[64**m]  #=> true
+    n*Lb[16]   == m*Lb[64]   #=> true
+    n*Lb[2**4] == m*Lb[2**6] #=> true
+    4*n*Lb[2]  == 6*m*Lb[2]  #=> true
+    4*n == 6*m               #=> true
+    2*n == 3*m               #=> true
+    # Substituting m=2i,n=3i satisfies the condition.
+    m == 2*i                 #=> true
+    n == 3*i                 #=> true
+    2*(3*i) == 3*(2*i)       #=> true
+    6*i == 6*i               #=> true
+    i == i                   #=> true
+
+So what's the lowest base 64 and 16 commensurable entropy above `2**256`?
+
+     E.length(2**256, 16) #=> 64
+     E.length(2**256, 64) #=> 43
+
+     # Get i somehow.
+     i = (43/2.0).ceil #=> 22
+     i = (64/3.0).ceil #=> 22
+     i = (1..100).detect{|i| 3*i >= 64 and 2*i >= 43} #=> 22
+     # Then get m and n.
+     m = 2*i #=> 44
+     n = 3*i #=> 66
+
+     16**66 == 64**44                   #=> true
+     Lb[16**66]                         #=> 264.0
+     Lb[64**44]                         #=> 264.0
+     2**264==16**66 and 2**264==64**44  #=> true
+
+So, does Entropia's equilence among bases 2, 16, and 64 work?
+With entropy `2**264`, yes!:
+
+    e2 = E[264]{RNG}
+    e16 = e2*16
+    e64 = e2*64
+
+    e16
+    #=> C0FA86BB52793E6063CC95A7D8CD087CB1762382F3853E031DC7D0C293ADCB0C93
+    e64
+    #=> mFg6kr9vFc1Zp9MdsCq8VB5s8uBpXJu37SVGmfEjomoJ
+
+    e2  == e16  #=> true
+    e2  == e64  #=> true
+    e16 == e64  #=> true
 
      'stop' #=> now
 
