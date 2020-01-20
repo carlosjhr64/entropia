@@ -1,6 +1,6 @@
 # entropia
 
-* [VERSION 0.1.200119](https://github.com/carlosjhr64/entropia/releases)
+* [VERSION 0.1.200120](https://github.com/carlosjhr64/entropia/releases)
 * [github](https://www.github.com/carlosjhr64/entropia)
 * [rubygems](https://rubygems.org/gems/entropia)
 
@@ -9,17 +9,21 @@
 Creates random strings with different base alphabets and
 converts to and from.
 
-Convert random sequence of '0's and '1's to hexadecimal, for example.
 Keeps track of the entropy content of the strings.
 Keeps track of the number of bits that were randomly generated.
 Keeps track of it's shuffled state.
 
 ## SYNOPSIS:
 
+* Subclases [BaseConvert](https://www.github.com/carlosjhr64/base_convert)
+
+
     $ irb -I ./lib 
     # Welcome to IRB...
     require 'entropia'
     include ENTROPIA
+
+    RNG = Random.new(0)
 
     e = Entropia.new '00000000', base: 2
     e #=> 00000000 2:P95 0.0% -
@@ -34,19 +38,19 @@ Keeps track of it's shuffled state.
     e.shuffled? #=> false
     e.randomness #=> 0.0
 
-    e.randomize!(random: Random.new(0)) #=> 10101100 2:P95 100% -
+    e.randomize!(random: RNG) #=> 10101100 2:P95 100% -
     e.randomness #=> 8.0
 
-    f = e.shuffle(random: Random.new(1))
-    f #=> 01001101 2:P95 100% +
+    f = e.shuffle(random: RNG)
+    f #=> 01010110 2:P95 100% +
     # The '+' sign on the inspect above marks the "true" shuffle state.
     f.shuffled? #=> true
 
     g = f.to_base 16
-    g #=> 4D 16:P95 100% +
+    g #=> 56 16:P95 100% +
 
     dg = g.sha2
-    dg #=> 19DE495E14C9E7A2623EEEF6D2B7D84D0A14D4C202B34BEA0F29EA4650F4E137 16:P95 3.1% +
+    dg #=> 7688B6EF52555962D008FFF894223582C484517CEA7DA49EE67800ADC7FC8866 16:P95 3.1% +
     dg.bits #=> 256.0
     dg.randomness #=> 8.0
     # The 3.1% above on the inspect is the percent random value:
@@ -59,6 +63,25 @@ Keeps track of it's shuffled state.
 ## INSTALL:
 
     $ gem install entropia
+
+## KNOWN ISSUES:
+
+Currently, Entropia naively adds randomness up...
+this only works when adding independent sources.
+Here are two cases where the calculations go wrong.
+
+    a = E[60]{RNG}*64 #=> LPKHLYPjRo 64:P95 100% -
+    a.randomness #=> 60.0
+    aa = a+a #=> LPKHLYPjRoLPKHLYPjRo 64:P95 100% -
+    aa.randomness #=> 120.0
+
+    z = a^a #=> 0000000000 64:P95 100% -
+    z.randomness #=> 60.0
+
+## BETA TESTING:
+
+Probably the best way to see the intended use of Entropia
+is by following along my [beta testing page](BETA_TESTING.md) for the gem.
 
 ## LICENSE:
 
