@@ -15,8 +15,7 @@ Keeps track of it's shuffled state.
 
 ## SYNOPSIS:
 
-* Subclases [BaseConvert](https://www.github.com/carlosjhr64/base_convert)
-
+Note that Entropia subclases [BaseConvert](https://www.github.com/carlosjhr64/base_convert):
 
     $ irb -I ./lib 
     # Welcome to IRB...
