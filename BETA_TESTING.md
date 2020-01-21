@@ -579,7 +579,7 @@ That is because the key's randomness did not cover the entire entropy of the mes
 Now, please note that when the message is decoded from the cipher,
 Entropia erroneously also gives the decode a 73% random value.
 I have some ideas as to how to handle this for future versions of Entropia, but
-for now (version 4), one just needs to be aware of the issue:
+for now (version 0.1), one just needs to be aware of the issue:
 
     decode = key^cipher
     decode
