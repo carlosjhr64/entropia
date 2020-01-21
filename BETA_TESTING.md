@@ -586,156 +586,65 @@ for now (version 0.1), one just needs to be aware of the issue:
     #=> My top secret message! 95:P95 73% -
     # 73% random here is a known issue in Entropia.
 
+## Cryptographic hash function
+
+See Wikipedia's [Cryptographic hash function](http://en.wikipedia.org/wiki/Cryptographic_hash_function) article.
+The useful properties are:
+
+1. It is infeasible to generate a message that has a given hash.
+2. It is infeasible to modify a message without changing the hash.
+3. It is infeasible to find two different messages with the same hash.
+
+Entropia offers the digests available in Ruby's Digest library:
+
+    message = E.new 'Hello World'
+
+    # SHA2.new(256)
+    message.sha2
+    #=> quO3_#b>G,\Kx@`AQO4j:zigP2Nw`W0i[@Y<hL) 95:P95 0.0% +
+
+    # SHA2.new(512)
+    message.sha2(512)
+    #=> C8Ux$<#T]!besQ;}T]Qo20%YO&arYOo*wnl=!$%`(BON"5xNg~WSzL^\(<v;gX]mdf8QA2nl[,M{Y( 95:P95 0.0% +
+
+    # SHA1
+    message.sha1
+    #=> 0JC(y6|tRn@j<a`v1_zY&@oT* 95:P95 0.0% +
+
+    # MD5
+    message.md5
+    #=> 6Mgb:]:fG3jC{dSm)@1q 95:P95 0.0% +
+
+    # RMD160
+    message.rmd160
+    #=> RcncK?{\vQ'W. h)zsENMObe 95:P95 0.0% +
+
+Note that these are marked as shuffled.
+
+## Salt
+
+See Wikipedia's [Salt](https://en.wikipedia.org/wiki/Salt_%28cryptography%29) article.
+Salt can be used to add entropy to a low entropy string.
+For example, one could have a local system create a stronger password
+to access a remote with a locally stored salt and a user provided pin:
+
+    pin = E.new '123', base: 95 #=> 123 95:P95 0.0% -
+    salt = E[256]{RNG}*95
+    #=> cmxBE0/u{XY#GBNUn_['uf,skeT~.t``+@9HkOg 95:P95 100% -
+    salted = salt+pin
+    #=> cmxBE0/u{XY#GBNUn_['uf,skeT~.t``+@9HkOg123 95:P95 93% -
+    password = salted.sha2
+    #=> ~c5-?(j>w8[t]?](g58Y\*c\sY"K-ipHD5I:a$' 95:P95 100% +
+    password.randomness #=> 256.0
+
+So now the user enters locally some easy to remember pin, and
+out to the remote goes an uncrackable password.
+This of course assumes your local copy of the salt is safe...
+safe enough to be guarded by a low entropy pin.
+
     'stop' #=> now
 
-#
-# ***Cryptographic hash function***
-#
-
-# `otpr` uses SHA512 and MD5 digests[http://en.wikipedia.org/wiki/Cryptographic_hash_function].
-# The their useful properties are:
-#    1) It is infeasible to generate a message that has a given hash.
-#    2) It is infeasible to modify a message without changing the hash.
-#    3) It is infeasible to find two different messages with the same hash.
-# I use MD5 to name a pin's files.  Given a pin, I know the files to use for the pin,
-# but knowing the file names does not tell me the pin.
-# And I use SHA512 to create the encription key.
-# The reason is a bit subtle.
-# The encription key should be random, but often times it's based on a meaningful message.
-# SHA512 completely scrambles any message (or lack of randomness)
-# that might otherwise creep into the encription key.
-
-#
-# ***Salt***
-#
-
-# Salt[http://en.wikipedia.org/wiki/Salt_(cryptography)] is added to the pin
-# to project the final encription key from attempts at getting the key by simply guessing the pin.
-# The salt is combined from two salt files, one in the removable media (yin salt), and
-# one in a secured cache directory (yang salt).
-
-  s0 = E[256]
-  s0.randomness
-  #=> 0
-  s1 = E.new.pp(256, random: true){|n| rand(n)}
-  s1.randomness
-  #=> 256
-
-# For the yang salt, the library gets random bits from random.org to guarantee randomness.
-# But for our analysis here, we just call rand and pretend it's random.
- 
-# s0*Q and s1*Q is what's stored in the salt files.
-# This makes it easier to inspect.
-# The combined salt is:
-
-  s = s0*Q + s1*Q
-  s.randomness
-  #=> 256
-  s.bits
-  #=> 512
-  s.shuffled?
-  #=> false
-
-# Note that the first part of the string is pseudo-random, while second is real random.
-# This won't matter, as it'll all go into SHA512(but Entropia keeps track of the shuffle state).
-# The passphrase is the salted pin, which is given by the user.
-# I'll denote the pin as p, and the passphrase as w:
-
-  p = Entropia.new 'ThePin', Q # whatever the user says
-  w = p + s
-  # or expanded out...
-  w = p + s0*Q + s1*Q
-  # Looks like "ThePin..."
-  w.randomness
-  #=> 256
-  w.bits
-  #=> Greater than 512
-  w.shuffled?
-  #=> false
-
-# I don't know if it matters, but in case the digest preserves any information,
-# I feed in order of increasing randomness: p, s0, s1 => p+s0*Q+s1*Q.
-# The SHA512 digest of w is a binary string of length 64.
-
-  k0 = D[w]
-  k0.length
-  #=> 64
-  k0.bits
-  #=> 512.0
-  k0.randomness
-  #=> 256.0
-  k0.shuffled?
-  #=> true (I think we can agree on this)
-  k0.class
-  #=> String
-  # Entropia handles digests separately.  The String instance is extended.
-
-# Because this is going to be one of the encriptions key,
-# the secret(master-password) should not be much bigger than 64 characters.
-# The key, k0, can be assumed to have an entropy capacity of 512 bits, and
-# since our salt had at least 256 bits of randomness, this key should be good to go!
-# Expanded out, k0 is:
-
-  k0 = D[ p + s0*Q + s1*Q ]
-
-# Now we can do our first encription.
-# Given our plain text passwoard, P:
-
-  P = Entropia.new 'Top_Secret_Password!', Q
-  c0 = k0^P  # => looks like S{)\xABI\x02...
-  k0^c0      # => 'Top_Secret_Password!'
-  (k0^c0).class #=> String: remember that k0 is an extended String, so xor returns a String.
-  P.to_s == k0^c0
-  #=> true: So to test equality, we need to convert P to a string.
-
-
-# Tada!
-# Expanded all out:
-
-   c0 = D[ p + s0*Q + s1*Q ] ^ P
-
-   D[ p + s0*Q + s1*Q ] ^ c0
-   #=> "Top_Secret_Password!"
-
-# To store the encripted secret, and allow the use of multiple pins,
-# I need a filename, f, that's based on the pin, but
-# that cannot be reversed back to the pin.
-
-   # Looks like 1Rpq3qgBnMMLC3aPUsS7t
-   f = C[w]*W
-
-   # or expanded out...
-   f = C[p + s0*Q + s1*Q]*W
-   # You can verify that
-   C[w]*W == C[p + s0*Q + s1*Q]*W
-   #=> true
-
-# I save the secret in the cache directory under the name of f.
-# But what if at some point, because the salts and pin don't change,
-# the passphrase to the secret is compromised?
-# The p(pin) is in your head, s0(Yin's salt) is in removable media, and
-# s1(Yang's salt) is in a user only readable directory.
-# How is the passphrase going to be compromised?  LOL.
-# But let's make it as near impossible as possible!  :P
-# I re-encript with a new random key and save the key in the removable media under f.
-
-  q = E[256]*Q
-  k1 = D[q]
-
-# BTW, here k1 has 256 bits of entropy, not more.
-
-  c1 = k1^c0
-  c0 == k1^c1 #=> true
-
-# q is saved in yin/f and c1 is saved in yang/f.
-# The --regen option allows one to re-generate the two files.
-# The regenaration does not need to know the passphrase.
-# So if at anytime any either Yin or Yang is compromised,
-# just regenarate all the pads.
-
-#
-# ***Entropy from words?***
-#
+## Entropy from words
 
 # The file
 #    /usr/share/dict/american-english
