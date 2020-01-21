@@ -142,9 +142,9 @@ module ENTROPIA
         @randomness += n*Lb[@base]  if random
         @integer = toi(string)
       else
-        @shuffled &&= false
         @integer ||= 0
       end
+      @shuffled &&= false
       # Revaluate entropy as a whole.
       @entropy = @base ** (n + length)
       self
