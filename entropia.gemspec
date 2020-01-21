@@ -15,7 +15,6 @@ Gem::Specification.new do |s|
 Creates random strings with different base alphabets and
 converts to and from.
 
-Convert random sequence of '0's and '1's to hexadecimal, for example.
 Keeps track of the entropy content of the strings.
 Keeps track of the number of bits that were randomly generated.
 Keeps track of it's shuffled state.
@@ -28,14 +27,15 @@ SUMMARY
 
   s.require_paths = ['lib']
   s.files = %w(
-ANALYSIS.txt
+BETA_TESTING.md
 README.md
 lib/entropia.rb
 lib/entropia/digest.rb
 lib/entropia/entropia.rb
+lib/entropia/terse.rb
   )
 
-  s.add_runtime_dependency 'base_convert', '~> 3.1', '>= 3.1.191231'
+  s.add_runtime_dependency 'base_convert', '~> 4.0', '>= 4.0.200111'
   s.requirements << 'ruby: ruby 2.7.0p0 (2019-12-25 revision 647ee6f091) [x86_64-linux]'
 
 end
