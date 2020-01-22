@@ -601,23 +601,23 @@ Entropia offers the digests available in Ruby's Digest library:
 
     # SHA2.new(256)
     message.sha2
-    #=> quO3_#b>G,\Kx@`AQO4j:zigP2Nw`W0i[@Y<hL) 95:P95 0.0% +
+    #=> =0,a@2lAeqYI,0@V7)VXe:MqiN~S;uZpP*|j& r 95:P95 0.0% +
 
     # SHA2.new(512)
     message.sha2(512)
-    #=> C8Ux$<#T]!besQ;}T]Qo20%YO&arYOo*wnl=!$%`(BON"5xNg~WSzL^\(<v;gX]mdf8QA2nl[,M{Y( 95:P95 0.0% +
+    #=> W}}E3 :^m&=Oa4";m|(V_s}(pgw}a.t}'{;7FR6irQpa=Wv}"qtr@y$m}cS="Nl,u|k~y+TH/QV6FM 95:P95 0.0% +
 
     # SHA1
     message.sha1
-    #=> 0JC(y6|tRn@j<a`v1_zY&@oT* 95:P95 0.0% +
+    #=> 16/m}JXcCX5ii$^4w?J\s\g|u 95:P95 0.0% +
 
     # MD5
     message.md5
-    #=> 6Mgb:]:fG3jC{dSm)@1q 95:P95 0.0% +
+    #=> 0i3>I_$}c/U&rn?0Ct!a 95:P95 0.0% +
 
     # RMD160
     message.rmd160
-    #=> RcncK?{\vQ'W. h)zsENMObe 95:P95 0.0% +
+    #=> 2|xJx(;s|wKk}S_{!"\p97-0- 95:P95 0.0% +
 
 Note that these are marked as shuffled.
 
@@ -634,7 +634,7 @@ to access a remote with a locally stored salt and a user provided pin:
     salted = salt+pin
     #=> cmxBE0/u{XY#GBNUn_['uf,skeT~.t``+@9HkOg123 95:P95 93% -
     password = salted.sha2
-    #=> ~c5-?(j>w8[t]?](g58Y\*c\sY"K-ipHD5I:a$' 95:P95 100% +
+    #=> u_!n WiAMJiw$_F_PmH^bO#7<Lh8(^4odpcIz+R 95:P95 100% +
     password.randomness #=> 256.0
 
 So now the user enters locally some easy to remember pin, and

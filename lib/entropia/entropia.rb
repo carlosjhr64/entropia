@@ -237,6 +237,12 @@ module ENTROPIA
       each_divmod(256, &block)
     end
 
+    def data
+      str = ''
+      each_byte{|b| str << b}
+      return str
+    end
+
     def xor(message)
       key = self
       # Want the lesser entropy to act as key.

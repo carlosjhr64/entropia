@@ -1,6 +1,6 @@
 # entropia
 
-* [VERSION 0.1.200121](https://github.com/carlosjhr64/entropia/releases)
+* [VERSION 0.1.200122](https://github.com/carlosjhr64/entropia/releases)
 * [github](https://www.github.com/carlosjhr64/entropia)
 * [rubygems](https://rubygems.org/gems/entropia)
 
@@ -49,7 +49,7 @@ Note that Entropia subclases [BaseConvert](https://www.github.com/carlosjhr64/ba
     g #=> 56 16:P95 100% +
 
     dg = g.sha2
-    dg #=> 7688B6EF52555962D008FFF894223582C484517CEA7DA49EE67800ADC7FC8866 16:P95 3.1% +
+    dg #=> DE5A6F78116ECA62D7FC5CE159D23AE6B889B365A1739AD2CF36F925A140D0CC 16:P95 3.1% +
     dg.bits #=> 256.0
     dg.randomness #=> 8.0
     # The 3.1% above on the inspect is the percent random value:

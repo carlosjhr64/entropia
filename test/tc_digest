@@ -8,10 +8,11 @@ class TestEntropia < Test::Unit::TestCase
   def test_000_digests
     string = '123abc'
     n = Entropia.new string, base:16, digits: '0123456789abcdef'
-    assert_equal Digest::SHA2.new(256).hexdigest(string), n.sha2.to_s
-    assert_equal Digest::SHA2.new(512).hexdigest(string), n.sha2(512).to_s
-    assert_equal Digest::SHA1.hexdigest(string),          n.sha1.to_s
-    assert_equal Digest::MD5.hexdigest(string),           n.md5.to_s
-    assert_equal Digest::RMD160.hexdigest(string),        n.rmd160.to_s
+    data = n.data
+    assert_equal Digest::SHA2.new(256).hexdigest(data), n.sha2.to_s
+    assert_equal Digest::SHA2.new(512).hexdigest(data), n.sha2(512).to_s
+    assert_equal Digest::SHA1.hexdigest(data),          n.sha1.to_s
+    assert_equal Digest::MD5.hexdigest(data),           n.md5.to_s
+    assert_equal Digest::RMD160.hexdigest(data),        n.rmd160.to_s
   end
 end
