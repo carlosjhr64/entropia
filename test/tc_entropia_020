@@ -56,8 +56,8 @@ class TestEntropia < Test::Unit::TestCase
   end
 
   def test_024_shuffle_negation
-    a = E.new 'AA', base: 95, shuffled: true
-    b = E.new 'BB', base: 95, shuffled: true
+    a = E.new 'AA', base: 64, shuffled: true
+    b = E.new 'BB', base: 64, shuffled: true
     # a and b constructed as shuffled
     assert a.shuffled?
     assert b.shuffled?
@@ -77,7 +77,7 @@ class TestEntropia < Test::Unit::TestCase
     refute f.shuffled?
     # When one of the entries has a higher entropy...
     # <big shuffled><little not shuffled> is considered shuffled
-    x = E.new 'X', base: 95, shuffled: false
+    x = E.new 'X', base: 64, shuffled: false
     assert (d^x).shuffled?
     assert (x^d).shuffled?
   end
