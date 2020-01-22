@@ -24,40 +24,53 @@ Note that Entropia subclases [BaseConvert](https://www.github.com/carlosjhr64/ba
 
     RNG = Random.new(0)
 
-    e = Entropia.new '00000000', base: 2
-    e #=> 00000000 2:P95 0.0% -
-    e.inspect #=> "00000000 2:P95 0.0% -"
-    e.to_i #=> 0
-    e.to_s #=> "00000000"
-    e.length #=> 8
-    e.entropy #=> 256
-    e.bits #=> 8.0
-    e.binary #=> "00000000"
+    a = Entropia.new '0011', base: 2
+    a.inspect #=> "0011 2:P95 0.0% -"
+    a.to_i #=> 3
 
-    e.shuffled? #=> false
-    e.randomness #=> 0.0
+    e2 = Entropia.new 5, entropy:16, base: 2
+    e2 #=> 0101 2:P95 0.0% -
+    e2.to_s #=> "0101"
 
-    e.randomize!(random: RNG) #=> 10101100 2:P95 100% -
-    e.randomness #=> 8.0
+    e2.increment!(4)
+    e2 #=> 00000101 2:P95 0.0% -
+    e2.entropy #=> 256
+    e2.bits #=> 8.0
 
-    f = e.shuffle(random: RNG)
-    f #=> 01010110 2:P95 100% +
-    # The '+' sign on the inspect above marks the "true" shuffle state.
-    f.shuffled? #=> true
+    e8 = e2.to_base(8)
+    e8 #=> 005 8:P95 0.0% -
+    e8.length #=> 3
+    e8.binary #=> "000000101"
 
-    g = f.to_base 16
-    g #=> 56 16:P95 100% +
+    e8.shuffled? #=> false
+    e8.randomness #=> 0.0
 
-    dg = g.sha2
-    dg #=> DE5A6F78116ECA62D7FC5CE159D23AE6B889B365A1739AD2CF36F925A140D0CC 16:P95 3.1% +
+    f8 = e8.shuffle(RNG) #=> 030 8:P95 0.0% +
+    f8.binary #=> "000011000"
+
+    f8.randomize!(random: RNG) #=> 425 8:P95 100% -
+    f8.randomness #=> 9.0
+
+    g = f8*16
+    g #=> 115 16:P95 75% -
+
+    dg = g.digest
+    dg #=> 764C8A3561C7CF261771B4E1969B84C210836F3C034BAEBAC5E49A394A6EE0A9 16:P95 3.5% +
     dg.bits #=> 256.0
-    dg.randomness #=> 8.0
-    # The 3.1% above on the inspect is the percent random value:
-    dg.randomness / dg.bits #=> 0.03125
+    dg.randomness #=> 9.0
+    # The 3.5% above on the inspect is the percent random value:
+    dg.randomness / dg.bits #=> 0.03515625
+
+    data = dg.data
+    data.unpack1('H*') #=> 764c8a3561c7cf261771b4e1969b84c210836f3c034baebac5e49a394a6ee0a9
 
     key = Entropia.new 'Where does it rain?', base: 95
     code = Entropia.new 'Z*~RUwN=MuHCh ^*Nl#6FVNi7YsQ5xw<(gp', base: 95
     (key^code).to_s #=> "The rain rains mainly in the plain."
+
+    a = E[60]{RNG}*64 #=> 9crl9m1RSa 64:P95 100% -
+    b = E[60]{876858701620395078}*32 #=> OAPQAVI4MF26 32:P95 0.0% -
+    a+b #=> 9crl9m1RSamhEbVaIpn6 64:P95 50% -
 
 ## INSTALL:
 
@@ -69,9 +82,9 @@ Currently, Entropia naively adds randomness up...
 this only works when adding independent sources.
 Here are two cases where the calculations go wrong:
 
-    a = E[60]{RNG}*64 #=> LPKHLYPjRo 64:P95 100% -
+    a = E[60]{RNG}*64 #=> mhEbVaIpn6 64:P95 100% -
     a.randomness #=> 60.0
-    aa = a+a #=> LPKHLYPjRoLPKHLYPjRo 64:P95 100% -
+    aa = a+a #=> mhEbVaIpn6mhEbVaIpn6 64:P95 100% -
     aa.randomness #=> 120.0
 
     z = a^a #=> 0000000000 64:P95 100% -
@@ -82,10 +95,10 @@ Also, I made some perhaps arbitrary choices as to how shuffle state is preserved
     a = E.new 'ABCDEFG', base: 95
     i = E.new '1234567', base: 95
     # shuffle the bits...
-    as = a.shuffle(RNG) #=> [KSzh$H 95:P95 0.0% +
+    as = a.shuffle(RNG) #=> Cu8T|Sa 95:P95 0.0% +
     is = i.shuffle(RNG) #=> 1)10qm! 95:P95 0.0% +
     # Concat negates shuffle state
-    as+is #=> [KSzh$H1)10qm! 95:P95 0.0% -
+    as+is #=> Cu8T|Sa1)10qm! 95:P95 0.0% -
 
 ## BETA TESTING:
 
