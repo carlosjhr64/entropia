@@ -237,9 +237,9 @@ module ENTROPIA
     end
 
     def data
-      str = ''
-      each_byte{|b| str << b}
-      return str
+      string = ''
+      each_byte{|b| string.prepend b.chr}
+      return string
     end
 
     def xor(message)
