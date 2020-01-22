@@ -67,7 +67,7 @@ Note that Entropia subclases [BaseConvert](https://www.github.com/carlosjhr64/ba
 
 Currently, Entropia naively adds randomness up...
 this only works when adding independent sources.
-Here are two cases where the calculations go wrong.
+Here are two cases where the calculations go wrong:
 
     a = E[60]{RNG}*64 #=> LPKHLYPjRo 64:P95 100% -
     a.randomness #=> 60.0
@@ -76,6 +76,16 @@ Here are two cases where the calculations go wrong.
 
     z = a^a #=> 0000000000 64:P95 100% -
     z.randomness #=> 60.0
+
+Also, I made some perhaps arbitrary choices as to how shuffle state is preserved:
+
+    a = E.new 'ABCDEFG', base: 95
+    i = E.new '1234567', base: 95
+    # shuffle the bits...
+    as = a.shuffle(RNG) #=> [KSzh$H 95:P95 0.0% +
+    is = i.shuffle(RNG) #=> 1)10qm! 95:P95 0.0% +
+    # Concat negates shuffle state
+    as+is #=> [KSzh$H1)10qm! 95:P95 0.0% -
 
 ## BETA TESTING:
 

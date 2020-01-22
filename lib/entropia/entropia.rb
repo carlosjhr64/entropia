@@ -122,7 +122,7 @@ module ENTROPIA
     def randomize!(random: Random)
       @integer = random.random_number(@entropy)
       @randomness = Lb[@entropy]
-      @shuffled = false
+      @shuffled &&= false
       self
     end
 
@@ -182,13 +182,12 @@ module ENTROPIA
         b = x.base # or y.base # same
         e = x.entropy * y.entropy
         r = x.randomness + y.randomness
-        f = x.shuffled? and y.shuffled?
         d = x.digits # or y.digits # same
         x = Entropia.new(string,
                          base:       b,
                          entropy:    e,
                          randomness: r,
-                         shuffled:   f,
+                         shuffled:   false, # concat invalidates shuffled
                          digits:     d)
       end
       return x
