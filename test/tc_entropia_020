@@ -47,4 +47,11 @@ class TestEntropia < Test::Unit::TestCase
     assert_equal '1100 2:P95 100% -', E[4]{rng}.inspect
     assert_equal '1111 2:P95 100% -', E[4]{rng}.inspect
   end
+
+  def test_024_data
+    assert_equal 'a', E.new(97).data
+    # Data bytes are returned from low to high... :-??
+    # It's just the way algorythm wants to be.
+    assert_equal 'cba', E.new(97*(256**2) + 98*256 + 99).data
+  end
 end
