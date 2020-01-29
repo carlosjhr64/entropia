@@ -31,7 +31,7 @@ sixteen possible arrangements:
 
 ## Entropia gem
 
-I'll use the Entropia gem to write the mathetical notation:
+I'll use the Entropia gem to write the mathematical notation:
 
     require 'entropia'
     include ENTROPIA
@@ -52,12 +52,12 @@ I'll use the Entropia gem to write the mathetical notation:
     BaseConvert::DIGITS[:P95]
     #=> 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!?$&@*+-/<=>^~,.:;|#\()[]{}%"'`_ 
 
-The Entropia gem subclasses the
+The Entropia gem sub-classes the
 [BaseConvert gem](https://github.com/carlosjhr64/base_convert).
 
 ## Bits
 
-A bit of information is knowlege of something that could be found in one of two ways...
+A bit of information is knowledge of something that could be found in one of two ways...
 true or false...  "1" or "0".
 For 4 bits of entropy I write:
 
@@ -149,7 +149,7 @@ I'll use the following constants in MKS units to scale out quantities:
 
 The entropy of a String is important in passwords.
 According to Wikipedia's
-[Paswords strength](http://en.wikipedia.org/wiki/Password_strength)
+[Passwords strength](http://en.wikipedia.org/wiki/Password_strength)
 article:
 
 > Due to currently understood limitations from fundamental physics,
@@ -314,8 +314,8 @@ Hexadecimal is commensurable with 256 bits:
     
     2**256 == 16**64 #=> true
 
-While the string reprectation of `eh` differs from `e`,
-`eh` and `e` reprepreset the same entropy:
+While the string representation of `eh` differs from `e`,
+`eh` and `e` represents the same entropy:
 
     eh.to_s == e.to_s #=> false
     # Nonetheless...
@@ -330,7 +330,7 @@ While the string reprectation of `eh` differs from `e`,
 
 Just to show that this is reversible:
 
-    # Convert eh bach to base 2:
+    # Convert eh back to base 2:
     e2 = eh*2
     # Note e2 and e are not the same object:
     e2.equal? e #=> false
@@ -341,7 +341,7 @@ Just to show that this is reversible:
 
 ## Commensurability
 
-Now, 256 bits is not commensarable with base 64:
+Now, 256 bits is not commensurable with base 64:
 
     Math.log(2**256, 64) #=> 42.66666666666667
     E.length(2**256, 64) #=> 43
@@ -385,14 +385,14 @@ I can show why base 2 and base 3 can never mix:
     a = [1,2,3,4,5,6,7,8,9,10]
     a.product(a).any?{|n,m| 2**n == 3**m} #=> false
 
-As 2 and 3 are primes, any powers of 2 and 3 can not equal eachother.
+As 2 and 3 are primes, any powers of 2 and 3 can not equal each other.
 
 So what entropies are commesurable in base 16 and base 64?
 I will show that for any positive Integer `i>0`,
 entropies `16**n` and `65**m` will work when `m=2*i` and `n=3*i`.
 To get irb to follow along,
 I will set `i`, `m` and `n` to a numerically correct solution, but
-from there on it's a properly abtracted proof:
+from there on it's a properly abstracted proof:
 
     # These values are deduced below and
     # used by irb to computationally verify the statements
@@ -440,7 +440,7 @@ So what's the lowest base 64 and 16 commensurable entropy above `2**256`?
      Lb[64**44]                         #=> 264.0
      2**264==16**66 and 2**264==64**44  #=> true
 
-So, does Entropia's equilence among bases 2, 16, and 64 work?
+So, does Entropia's equivalence among bases 2, 16, and 64 work?
 With entropy `2**264`, yes!:
 
     e2 = E[264]{RNG}
@@ -568,7 +568,7 @@ I can set it though:
     key #=> _BX;LhGj_<4`2BF9 95:P95 100% -
 
 Now the key shows to be 100% random.
-Then the contructed cipher will calcutate it's randomness:
+Then the constructed cipher will calculate it's randomness:
 
     cipher = key^message
     #=>  e{Tt1!DM%b{BJBZ)/NAER 95:P95 73% -
